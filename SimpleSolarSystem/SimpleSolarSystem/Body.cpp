@@ -20,6 +20,9 @@ Body::~Body()
 {
 }
 
+/**
+ * Calculates the force vector felt by each orbital body.
+ */
 void Body::calculateForce(std::vector<Body> bodies)
 {
 	float delta_x = 0, delta_y = 0, distance = 0;
@@ -37,7 +40,8 @@ void Body::calculateForce(std::vector<Body> bodies)
 		unit_vector[0] += delta_x / distance;
 		unit_vector[1] += delta_y / distance;
 
-		double magnitude = (G * bodies[i].getMass()) / (distance * distance);
+		// F_g = ( G * m_1 * m_2) / r^2 
+		double magnitude = (G * mass * bodies[i].getMass()) / (distance * distance);
 
 		force_sum[0] += unit_vector[0] * magnitude;
 		force_sum[1] += unit_vector[1] * magnitude;
@@ -49,8 +53,8 @@ void Body::move(float delta_t)
 {
 	position[0] += velocity[0] * delta_t;
 	position[1] += velocity[1] * delta_t;
-	velocity[0] += force[0] * delta_t;
-	velocity[1] += force[1] * delta_t;
+	velocity[0] += (force[0] / mass) * delta_t;
+	velocity[1] += (force[1] / mass) * delta_t;
 }
 
 void Body::draw()

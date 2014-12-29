@@ -5,7 +5,7 @@
 #include <vector>
 #include "Body.h"
 
-#define G 6.67384E-11
+#define G 1 //6.67384E-11
 #define VERTEX_COUNT 50
 
 class OrbitalSystem
