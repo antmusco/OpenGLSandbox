@@ -59,21 +59,15 @@ int main(int argc, char** argv)
 	bool closeWindow = false;
 
 	OrbitalSystem system;
-	//float MASS_OF_SUN = 1.989E30; /*kg*/
-	//float MASS_OF_EARTH = 5.972E24; /*kg*/
-	//float MASS_OF_MARS =6.39E23; /*kg*/
-	//float RADIUS_OF_EARTH = 1.496E9; /*m*/
-	//float RADIUS_OF_MARS = 2.279E9; /*m*/
-	//float SCALE = 1.0E-4;
-	Body sun("Sun", 0, 0, 0, 0, 1000, 8);
-	Body earth("Earth", -20, 0, 0, sqrt(G * 1000 / 20), 1, 1);
-	Body mars("Mars", 30, 0, 0, -sqrt(G * 1000 / 30), 1, 1);
+	Body sun("Sun", 0, 0, 0, 0, SUN_MASS * SCALE, SUN_RADIUS * SCALE * 4);
+	Body earth("Earth", -( EARTH_TO_SUN * SCALE ), 0, 0, sqrt(G * ( SUN_MASS / EARTH_TO_SUN ) * SCALE), EARTH_MASS * SCALE, SUN_RADIUS * SCALE * 4);
+	Body mars("Mars", ( MARS_TO_SUN * SCALE ), 0, 0, -sqrt(G * ( SUN_MASS / MARS_TO_SUN ) * SCALE), MARS_MASS * SCALE, SUN_RADIUS * SCALE * 4);
 	
 	system.addBody(mars);
 	system.addBody(earth);
 	system.addBody(sun);
 
-	glScalef(0.01,0.015,0.015);
+	glScalef(0.0000025,0.00000375,0.00000375);
 
 	while (!closeWindow)
 	{
@@ -88,7 +82,7 @@ int main(int argc, char** argv)
 		//mesh2.draw();
 		//transform.getScale().x = 0.2;
 		//transform.getScale().y = 0.2;
-		system.update(1.0/CLOCKS_PER_SEC * 10);
+		system.update(1.0/CLOCKS_PER_SEC * 1000);
 		display.update();
 	}
 

@@ -41,7 +41,7 @@ void Body::calculateForce(std::vector<Body> bodies)
 		unit_vector[1] += delta_y / distance;
 
 		// F_g = ( G * m_1 * m_2) / r^2 
-		double magnitude = (G * mass * bodies[i].getMass()) / (distance * distance);
+		double magnitude = (G * mass * bodies[i].getMass()) / (distance * distance) * SCALE;
 
 		force_sum[0] += unit_vector[0] * magnitude;
 		force_sum[1] += unit_vector[1] * magnitude;
@@ -61,6 +61,8 @@ void Body::draw()
 {
 	if (name == "Earth")
 		glColor3f(0, 0.5, 0);
+	else if (name == "Mars")
+		glColor3f(1, 0, 0);
 	else
 		glColor3f(1, 0.9, 0);
 	glBegin(GL_POLYGON);
