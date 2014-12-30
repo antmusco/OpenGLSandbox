@@ -4,10 +4,12 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Geometry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Geometry.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.vs" />

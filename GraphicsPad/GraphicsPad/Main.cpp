@@ -5,6 +5,7 @@
 #include <string>
 #include "Display.h"
 #include "Shader.h"
+#include "Geometry.h"
 
 int main(int argc, char* argv[])
 {
@@ -14,58 +15,46 @@ int main(int argc, char* argv[])
 	Display display("Display", 800, 600);
 	Shader shader("shader.vs","shader.fs");
 
-	/* Deine vertices. */
-	GLfloat verts[] =
-	{
-		+0.0f, +0.0f, // 0
-		+1.0f, +0.0f, +0.0f,
-
-		+1.0f, +1.0f, // 1
-		+0.0f, +1.0f, +0.0f,
-
-		-1.0f, +1.0f, // 2
-		+0.0f, +0.0f, +1.0f,
-
-		-1.0f, -1.0f, // 3
-		+0.0f, +1.0f, +0.0f,
-
-		+1.0f, -1.0f, // 4
-		+0.0f, +0.0f, +1.0f,
-	};
+	Mesh cube = Geometry::makeCube();
 
 	/* Generate vertex buffer. */
 	GLuint vertexBufferID;
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, cube.vertexBufferSize(), cube.vertices, GL_STATIC_DRAW);
 	/* Vertex position attribute. */
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
 	/* Vertex color attribute. */
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, (char*)(sizeof(GLfloat) * 2));
-
-	/* Define indices. */
-	GLushort indices[] =
-	{
-		0, 1, 2,
-		0, 3, 4,
-	};
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (char*)(sizeof(GLfloat) * 3));
 
 	/* Generate index buffer. */
 	GLuint indexBufferID;
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube.indexBufferSize(), cube.indices, GL_STATIC_DRAW);
+
+	/************** Playing with uniform values... *************/
+	//glm::vec3 dominatingColor(1.0f, 0.0f, 0.0f);
+	//GLfloat yFlip = 1.0;
+	//GLint dominatingColorUniformLocation = glGetUniformLocation(shader.getProgram(), "dominatingColor");
+	//GLint yFlipUniformLocation = glGetUniformLocation(shader.getProgram(), "yFlip");
+	//glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+	//glUniform1f(yFlipUniformLocation, yFlip);
+	/***********************************************************/
 
 	/* Main loop. */
 	SDL_Event event;
 	do 
 	{
-		display.repaint(0, 0, 0, 1);
+		display.repaint(0, 0, 0, 1, shader.getProgram(), cube.numIndices);
 		SDL_PollEvent(&event);
 	} 
 	while (event.type != SDL_QUIT);
+
+	cube.cleanUp();
+
 	/* Quit using SDL. */
 	SDL_Quit();
 	return 0;

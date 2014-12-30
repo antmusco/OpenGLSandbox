@@ -59,9 +59,9 @@ int main(int argc, char** argv)
 	bool closeWindow = false;
 
 	OrbitalSystem system;
-	Body sun("Sun", 0, 0, 0, 0, SUN_MASS * SCALE, SUN_RADIUS * SCALE * 4);
-	Body earth("Earth", -( EARTH_TO_SUN * SCALE ), 0, 0, sqrt(G * ( SUN_MASS / EARTH_TO_SUN ) * SCALE), EARTH_MASS * SCALE, SUN_RADIUS * SCALE * 4);
-	Body mars("Mars", ( MARS_TO_SUN * SCALE ), 0, 0, -sqrt(G * ( SUN_MASS / MARS_TO_SUN ) * SCALE), MARS_MASS * SCALE, SUN_RADIUS * SCALE * 4);
+	Body sun("Sun", 0, 0, 0, 0, SUN_MASS * SCALE, SUN_RADIUS * SCALE * 12);
+	Body earth("Earth", -( EARTH_TO_SUN * SCALE ), 0, 0, sqrt(G * ( SUN_MASS / EARTH_TO_SUN ) * SCALE), EARTH_MASS * SCALE, SUN_RADIUS * SCALE * 6);
+	Body mars("Mars", ( MARS_TO_SUN * SCALE ), 0, 0, -sqrt(G * ( SUN_MASS / MARS_TO_SUN ) * SCALE), MARS_MASS * SCALE, SUN_RADIUS * SCALE * 6);
 	
 	system.addBody(mars);
 	system.addBody(earth);
