@@ -95,26 +95,40 @@ void Display::repaint(GLclampf red, GLclampf green, GLclampf blue,
 	SDL_GetWindowSize(window, &w, &h);
 	glViewport(0, 0, w, h);
 
-	/* Create the transformation matrix and projection matrix. */
-
-	glm::mat4 projectionMatrix = glm::perspective(30.0f, ((float)w / h), 
-		0.1f, 10.0f);	
-	glm::mat4 translationMatrix = glm::translate(projectionMatrix,
-		glm::vec3(0.0f, 0.0f, -3.0f));
-	glm::mat4 fullTransformMatrix = glm::rotate(translationMatrix, 54.0f,
-		glm::vec3(1.0f, 0.0f, 0.0f));
-
-	/* Apply the matricies to the shader uniform matrix variable. */
-	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID, 
-		"fullTransformMatrix");
-	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
-		&fullTransformMatrix[0][0]);
-
 	/* Set the clear color to the specified RGBA. */
 	glClearColor(red, green, blue, alpha);
 
 	/* Tell OpenGL to clear the color buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	/* Create the transformation matrix and projection matrix. */
+
+	glm::mat4 projectionMatrix = glm::perspective(30.0f, ((float)w / h), 
+		0.1f, 10.0f);
+
+	/* Get the location of the fullTransformMatrix uniform variable. */
+	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID, 
+		"fullTransformMatrix");
+
+	/* Cube 1: */
+	glm::mat4 translationMatrix = glm::translate(projectionMatrix,
+		glm::vec3(-1.0f, 0.0f, -3.0f));
+	glm::mat4 fullTransformMatrix = glm::rotate(translationMatrix, 36.0f,
+		glm::vec3(1.0f, 0.0f, 0.0f));
+	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
+		&fullTransformMatrix[0][0]);
+
+	/* Draw the elements to the window. */
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_SHORT, 0);
+
+	/* Cube 2: */
+	translationMatrix = glm::translate(projectionMatrix,
+		glm::vec3(1.0f, 0.0f, -3.75f));
+	fullTransformMatrix = glm::rotate(translationMatrix, 126.0f,
+		glm::vec3(0.0f, 1.0f, 0.0f));
+	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
+		&fullTransformMatrix[0][0]);
 
 	/* Draw the elements to the window. */
 	//glDrawArrays(GL_TRIANGLES, 0, 6);
