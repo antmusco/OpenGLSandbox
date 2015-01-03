@@ -7,6 +7,7 @@
 ******************************************************************************/
 #include <GL\glew.h>
 #include <glm\glm.hpp>
+#include <vector>
 
 /******************************************************************************
 *                                                                             *
@@ -30,6 +31,34 @@ struct Vertex
 {
 	glm::vec3 position;
 	glm::vec3 color;
+};
+
+/******************************************************************************
+*                                                                             *
+*                          Geometry::Triangle (struct)                        *
+*                                                                             *
+*******************************************************************************
+* MEMBERS                                                                     *
+*  vertices                                                                   *
+*          Index of the three corners of the triangle.                        *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Struct representing a simple triangle in 3-D space. The triangle consists  *
+*  of 3 sequential int values: the three indexes of the triangle.             *
+*                                                                             *
+*******************************************************************************/
+struct Triangle
+{
+	GLushort v1;
+	GLushort v2;
+	GLushort v3;
+	//Triangle(GLuint v1, GLuint v2, GLuint v3)
+	//{
+	//	this->v1 = v1;
+	//	this->v2 = v2;
+	//	this->v3 = v3;
+	//}
 };
 
 /******************************************************************************
@@ -107,4 +136,6 @@ class Geometry
 public:
 	static Mesh makeTriangle();
 	static Mesh makeCube();
+	static Mesh makeSphere();
+	static Mesh makeIsocohedron();
 };

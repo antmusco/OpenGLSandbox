@@ -5,7 +5,7 @@
 ******************************************************************************/
 #include <gl\glew.h>
 #include <glm\glm.hpp>
-#include<glm\gtc\matrix_transform.hpp>
+#include <glm\gtc\matrix_transform.hpp>
 #include <iostream>
 #include "Display.h"
 
@@ -43,6 +43,9 @@ Display::Display(std::string title, GLushort width, GLushort height)
 
 	/* Create the SDL GL context. */
 	context = SDL_GL_CreateContext(window);
+
+	/* Set the clear color to default. */
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	/* Initialize GLEW (binds all of OpenGL's functions to the hardware). */
 	GLenum status = glewInit();
@@ -87,51 +90,41 @@ Display::Display(std::string title, GLushort width, GLushort height)
 *  specified color and opacity.                                               *
 *                                                                             *
 *******************************************************************************/
-void Display::repaint(GLclampf red, GLclampf green, GLclampf blue,
-                      GLclampf alpha, GLuint programID, GLuint numIndicies)
+void Display::repaint(GLuint programID, GLuint numIndicies, 
+	glm::mat4 *transformation)
 {
 	/* Get the window dimensions and update the viewport. */
 	GLint w, h;
 	SDL_GetWindowSize(window, &w, &h);
 	glViewport(0, 0, w, h);
 
-	/* Set the clear color to the specified RGBA. */
-	glClearColor(red, green, blue, alpha);
+	/* Create the transformation matrix and projection matrix. */
+	glm::mat4 fullTransformMatrix = glm::perspective(30.0f, ( (float)w / h ),
+		0.1f, 10.0f) * (*transformation);
 
+	fullTransformMatrix *= camera.getWorldToViewMatrix();
+	
 	/* Tell OpenGL to clear the color buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	/* Create the transformation matrix and projection matrix. */
-
-	glm::mat4 projectionMatrix = glm::perspective(30.0f, ((float)w / h), 
-		0.1f, 10.0f);
 
 	/* Get the location of the fullTransformMatrix uniform variable. */
 	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID, 
 		"fullTransformMatrix");
 
-	/* Cube 1: */
-	glm::mat4 translationMatrix = glm::translate(projectionMatrix,
-		glm::vec3(-1.0f, 0.0f, -3.0f));
-	glm::mat4 fullTransformMatrix = glm::rotate(translationMatrix, 36.0f,
-		glm::vec3(1.0f, 0.0f, 0.0f));
+	/* Sphere 1: */
 	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
 		&fullTransformMatrix[0][0]);
 
 	/* Draw the elements to the window. */
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_SHORT, 0);
 
-	/* Cube 2: */
-	translationMatrix = glm::translate(projectionMatrix,
-		glm::vec3(1.0f, 0.0f, -3.75f));
-	fullTransformMatrix = glm::rotate(translationMatrix, 126.0f,
-		glm::vec3(0.0f, 1.0f, 0.0f));
+	fullTransformMatrix = glm::translate(fullTransformMatrix, glm::vec3(-5.0f, 0.0f, 0.0f));
+
+	/* Sphere 2: */
 	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
 		&fullTransformMatrix[0][0]);
 
 	/* Draw the elements to the window. */
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_SHORT, 0);
 
 	/* Swap the double buffer. */

@@ -7,7 +7,9 @@
 ******************************************************************************/
 #include <SDL\SDL.h>
 #include <GL\GL.h>
+#include <glm\glm.hpp>
 #include <string>
+#include "Camera.h"
 
 /******************************************************************************
  *																			  *
@@ -23,12 +25,19 @@ public:
 	/* ~Display */
 	~Display();
 	/* repaint */
-	void repaint(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha,
-		GLuint programID, GLuint numIndices);
+	void repaint(GLuint programID, GLuint numIndices, glm::mat4 *transformation);
+	void setClearColor(GLclampf red, GLclampf blue, GLclampf green, 
+		GLclampf alpha)
+	{
+		glClearColor(red, blue, green, alpha);
+	}
+	Camera* getCamera() { return &camera; }
 /* Private Members.*/
 private:
 	/* Pointer to the SDL Window. */
 	SDL_Window		*window;
 	/* Pointer to the GL Context. */
 	SDL_GLContext	context;
+	/* Camera for looking at the world. */
+	Camera			camera;
 };

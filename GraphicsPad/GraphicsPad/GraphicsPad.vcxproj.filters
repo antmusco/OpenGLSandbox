@@ -5,11 +5,13 @@
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.vs" />
