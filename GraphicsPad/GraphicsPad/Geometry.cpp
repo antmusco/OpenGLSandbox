@@ -180,13 +180,62 @@ Mesh Geometry::makeCube()
 	return cube;
 }
 
+Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
+{
+	/* Decleare return mesh and color of indices. */
+	Mesh plane;
+	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+
+	/* Calculate number of vertices and indices.  */
+	plane.numVertices = (GLint) NUM_TICKS * NUM_TICKS;
+	plane.numIndices = 4 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
+
+	/* Allocate heap space. */
+	plane.vertices = new Vertex[plane.numVertices]();
+	plane.indices = new GLushort[plane.numIndices]();
+
+	GLushort index = 0;
+
+	/* Define vertices. */
+	for (GLint i = 0; i < NUM_TICKS; i++)
+	{
+		for (GLint j = 0; j < NUM_TICKS; j++)
+		{
+			index = (GLushort)( i * NUM_TICKS ) + j;
+			plane.vertices[index] =
+			{
+				( ( i - ( ( NUM_TICKS - 1 ) / 2 ) ) * x ) + ( ( j - ( ( NUM_TICKS - 1 ) / 2 ) ) * y ),
+				color
+			};
+			plane.indices[index] = { index };
+		}
+	}
+	
+	/* Define indices. */
+	index = 0;
+	for (GLint i = 0; i < NUM_TICKS - 1; i++)
+	{
+		for (GLint j = 0; j < NUM_TICKS - 1; j++)
+		{
+			plane.indices[index + 0] = ( i * NUM_TICKS ) + j; // Top-left
+			plane.indices[index + 3] = ( ( i + 1 ) * NUM_TICKS ) + j; // Bottom-left
+			plane.indices[index + 2] = ( ( i + 1 ) * NUM_TICKS ) + j + 1; // Bottom-right
+			plane.indices[index + 1] = ( i * NUM_TICKS ) + j + 1; // Top-right
+			index += 4;
+		}
+	}
+
+	/* Return the mesh. */
+	return plane;
+}
+
 Mesh Geometry::makeIsocohedron()
 {
 	/* Define return mesh. */
 	Mesh ico;
 
 	/* Constant offset. */
-	GLfloat t = ( 1.0 + std::sqrtf(5.0) ) / 2;
+	GLfloat t = (GLfloat)( 1.0 + std::sqrtf(5.0) ) / 2;
 
 	/* Define the vertices locally. */
 	Vertex localVerts[] = {

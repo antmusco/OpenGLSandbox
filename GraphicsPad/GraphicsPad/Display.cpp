@@ -8,6 +8,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <iostream>
 #include "Display.h"
+#include "Geometry.h"
 
 /******************************************************************************
 *                                                                             *
@@ -126,8 +127,8 @@ void Display::updateViewport()
 *  specified color and opacity.                                               *
 *                                                                             *
 *******************************************************************************/
-void Display::repaint(GLuint programID, GLuint numIndicies, 
-	glm::mat4 *modelToWorldMatrix)
+void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
+                      std::vector<glm::mat4*> modelToWorldMatrices)
 {
 	/* Tell OpenGL to clear the color buffer and depth buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);	
@@ -139,16 +140,28 @@ void Display::repaint(GLuint programID, GLuint numIndicies,
 	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID,
 		"fullTransformMatrix");
 
-	/* Create the transformation matrix and projection matrix. */
-	glm::mat4 fullTransformMatrix =	viewToProjectionMatrix *
-		camera.getWorldToViewMatrix() *	( *modelToWorldMatrix );
+	/* Declare the fullTransformMatrix. */
+	glm::mat4 fullTransformMatrix;
 
-	/* Sphere 1: */
-	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
-		&fullTransformMatrix[0][0]);
+	/* Display Meshes. */
+	GLuint byteOffset = 0;
+	for (GLuint i = 0; i < meshes.size(); i++)
+	{
+		/* Generate the full transformation. */
+		fullTransformMatrix = viewToProjectionMatrix *
+			camera.getWorldToViewMatrix() *	(*modelToWorldMatrices.at(i));
 
-	/* Draw the elements to the window. */
-	glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_SHORT, 0);
+		/* Send the transformation data down to the buffer. */
+		glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
+			&fullTransformMatrix[0][0]);
+
+		/* Draw the elements to the window. */
+		glDrawElements(GL_TRIANGLES, meshes.at(i)->numIndices, 
+			GL_UNSIGNED_SHORT, (char*)byteOffset);
+
+		/* Update the byte offset. */
+		byteOffset += meshes.at(i)->indexBufferSize();
+	}
 
 	/* Swap the double buffer. */
 	SDL_GL_SwapWindow(window);

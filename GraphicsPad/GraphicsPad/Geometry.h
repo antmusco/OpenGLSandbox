@@ -9,6 +9,8 @@
 #include <glm\glm.hpp>
 #include <vector>
 
+#define NUM_TICKS 11.0f
+
 /******************************************************************************
 *                                                                             *
 *                           Geometry::Vertex (struct)                         *
@@ -53,12 +55,6 @@ struct Triangle
 	GLushort v1;
 	GLushort v2;
 	GLushort v3;
-	//Triangle(GLuint v1, GLuint v2, GLuint v3)
-	//{
-	//	this->v1 = v1;
-	//	this->v2 = v2;
-	//	this->v3 = v3;
-	//}
 };
 
 /******************************************************************************
@@ -138,4 +134,5 @@ public:
 	static Mesh makeCube();
 	static Mesh makeSphere();
 	static Mesh makeIsocohedron();
+	static Mesh makePlane(glm::vec3 x, glm::vec3 y);
 };

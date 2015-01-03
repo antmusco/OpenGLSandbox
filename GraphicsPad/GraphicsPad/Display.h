@@ -9,7 +9,9 @@
 #include <GL\GL.h>
 #include <glm\glm.hpp>
 #include <string>
+#include <vector>
 #include "Camera.h"
+#include "Geometry.h"
 
 #define  FOV   30.0f
 #define  NEAR   0.1f
@@ -30,7 +32,8 @@ public:
 	~Display();
 	void updateViewport();
 	/* repaint */
-	void repaint(GLuint programID, GLuint numIndices, glm::mat4 *transformation);
+	void repaint(GLuint programID, std::vector<Mesh*> meshes,
+                 std::vector<glm::mat4*> modelToWorldMatrices);
 	void setClearColor(GLclampf red, GLclampf blue, GLclampf green, 
 		GLclampf alpha)
 	{
