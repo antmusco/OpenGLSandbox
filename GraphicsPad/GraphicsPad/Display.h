@@ -11,6 +11,10 @@
 #include <string>
 #include "Camera.h"
 
+#define  FOV   30.0f
+#define  NEAR   0.1f
+#define  FAR   10.0f
+
 /******************************************************************************
  *																			  *
  *								Display Class								  *
@@ -24,6 +28,7 @@ public:
 	Display(std::string title, GLushort width, GLushort height);
 	/* ~Display */
 	~Display();
+	void updateViewport();
 	/* repaint */
 	void repaint(GLuint programID, GLuint numIndices, glm::mat4 *transformation);
 	void setClearColor(GLclampf red, GLclampf blue, GLclampf green, 
@@ -34,6 +39,8 @@ public:
 	Camera* getCamera() { return &camera; }
 /* Private Members.*/
 private:
+	/* Current aspect ratio of the window. */
+	GLfloat         aspectRatio;
 	/* Pointer to the SDL Window. */
 	SDL_Window*		window;
 	/* Pointer to the GL Context. */
@@ -44,4 +51,6 @@ private:
 	SDL_Surface*	backgroundSurface;
 	/* Camera for looking at the world. */
 	Camera			camera;
+	/* View to Projection matrix. */
+	glm::mat4       viewToProjectionMatrix;
 };

@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 	/* Initialize all subsystems. */
 	SDL_Init(SDL_INIT_EVERYTHING);
 	/* Create the display. */
-	Display display("Display", 800, 600);
+	Display display("Display", 1500, 1000);
 	Shader shader("shader.vs","shader.fs");
 	Camera* camera = display.getCamera();
 
@@ -53,25 +53,29 @@ int main(int argc, char* argv[])
 
 	/* Main loop. */
 	SDL_Event event;
+	SDL_PollEvent(&event);
 	GLfloat rot = 0.0, xPos = 0.0, yPos = 0.0, zPos = 0.0;
-	std::clock_t t = clock();
+
 	glm::mat4 transMatrix;
 	glm::mat4 transfomration;
-	do 
+	std::clock_t t = clock();
+	while (event.type != SDL_QUIT)
 	{
-		if (!(( clock() - t ) % 5))
+		if (event.type == SDL_MOUSEMOTION)
 		{
-			xPos = 2 * std::sinf(rot);
-			zPos = 2 * std::cosf(rot);
-			transMatrix = glm::translate(glm::vec3(0.0f, 0.0f, -3.0f));
+			camera->updateLookAt({event.motion.x, event.motion.y});
+		}
+		if (( clock() - t ) % 10)
+		{
+			float xPos = 2 * std::sinf(rot);
+			float zPos = 2 * std::cosf(rot) - 5;
+			transMatrix = glm::translate(glm::vec3(xPos, 0.0f, zPos));
 			transfomration = glm::rotate(transMatrix, rot, glm::vec3(1.0f, 0.5f, 0.0f));
 			display.repaint(shader.getProgram(), cube.numIndices, &transfomration);
-			std::cout << rot << std::endl;
-			rot += 0.05;
+			rot += 0.001;
 		}
 		SDL_PollEvent(&event);
-	} 
-	while (event.type != SDL_QUIT);
+	}
 
 	cube.cleanUp();
 

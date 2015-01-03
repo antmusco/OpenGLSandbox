@@ -34,7 +34,7 @@
 *  to the hardware-specific implementation (OpenGL acts as an Adapter Class)  *
 *                                                                             *
 *******************************************************************************/
-Display::Display(std::string title, GLushort width, GLushort height)
+Display::Display(std::string title, GLushort width, GLushort height) 
 {
 	/* Create the SDL window. */
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, 
@@ -61,14 +61,44 @@ Display::Display(std::string title, GLushort width, GLushort height)
 	/* Enable depth buffering. */
 	glEnable(GL_DEPTH_TEST);
 
-	/* Blit the background image onto the screen. */
-	screenSurface = SDL_GetWindowSurface(window);
-	backgroundSurface = SDL_LoadBMP("res/background.bmp");
-	SDL_BlitSurface(backgroundSurface, NULL, screenSurface, NULL);
-	SDL_UpdateWindowSurface(window);
-
 	/* Show the version of GLEW currently being used. */
 	fprintf(stdout, "Stats: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
+	/* Update the viewport. */
+	updateViewport();
+}
+
+/******************************************************************************
+*                                                                             *
+*                           Display::updateViweport                           *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Function which gets the width and height of the window and updates the     *
+*  aspect ratio, the glViewwport, and the viewToPorojectionMatrix for the     *
+*  display.                                                                   *
+*                                                                             *
+*******************************************************************************/
+void Display::updateViewport()
+{
+	/* Get the width and height of the window and calculate aspect ratio. */
+	GLint width, height;
+	SDL_GetWindowSize(window, &width, &height);
+	aspectRatio = (GLfloat)width / height;
+
+	/* Update the GLviewport. */
+	glViewport(0, 0, width, height);
+
+	/* Calculate the View-To-Projection matrix. */
+	viewToProjectionMatrix = glm::perspective(FOV, aspectRatio, NEAR, FAR);
 }
 
 /******************************************************************************
@@ -97,40 +127,23 @@ Display::Display(std::string title, GLushort width, GLushort height)
 *                                                                             *
 *******************************************************************************/
 void Display::repaint(GLuint programID, GLuint numIndicies, 
-	glm::mat4 *transformation)
+	glm::mat4 *modelToWorldMatrix)
 {
-	
-	/* Tell OpenGL to clear the color buffer. */
+	/* Tell OpenGL to clear the color buffer and depth buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);	
 
-	SDL_BlitSurface(backgroundSurface, NULL, screenSurface, NULL);
-	SDL_UpdateWindowSurface(window);
-
 	/* Get the window dimensions and update the viewport. */
-	GLint w, h;
-	SDL_GetWindowSize(window, &w, &h);
-	glViewport(w*0.2, h*0.2, w*0.6, h*0.6);
-
-	/* Create the transformation matrix and projection matrix. */
-	glm::mat4 fullTransformMatrix = glm::perspective(30.0f, ( (float)w / h ),
-		0.1f, 1000.0f) * (*transformation);
-
-	fullTransformMatrix *= camera.getWorldToViewMatrix();
+	updateViewport();
 
 	/* Get the location of the fullTransformMatrix uniform variable. */
-	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID, 
+	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID,
 		"fullTransformMatrix");
 
+	/* Create the transformation matrix and projection matrix. */
+	glm::mat4 fullTransformMatrix =	viewToProjectionMatrix *
+		camera.getWorldToViewMatrix() *	( *modelToWorldMatrix );
+
 	/* Sphere 1: */
-	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
-		&fullTransformMatrix[0][0]);
-
-	/* Draw the elements to the window. */
-	glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_SHORT, 0);
-
-	fullTransformMatrix = glm::translate(fullTransformMatrix, glm::vec3(-5.0f, 0.0f, 0.0f));
-
-	/* Sphere 2: */
 	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
 		&fullTransformMatrix[0][0]);
 
@@ -163,9 +176,6 @@ void Display::repaint(GLuint programID, GLuint numIndicies,
 *******************************************************************************/
 Display::~Display()
 {
-	/* Deallocate space for the surface. */
-	SDL_FreeSurface(backgroundSurface);
-
 	/* Delete the GL context. */
 	SDL_GL_DeleteContext(context);
 
