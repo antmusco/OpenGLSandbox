@@ -55,18 +55,19 @@ int main(int argc, char* argv[])
 	SDL_Event event;
 	GLfloat rot = 0.0, xPos = 0.0, yPos = 0.0, zPos = 0.0;
 	std::clock_t t = clock();
+	glm::mat4 transMatrix;
+	glm::mat4 transfomration;
 	do 
 	{
-		if (!(( clock() - t ) % 10))
+		if (!(( clock() - t ) % 5))
 		{
 			xPos = 2 * std::sinf(rot);
 			zPos = 2 * std::cosf(rot);
-			glm::mat4 transMatrix = glm::translate(glm::vec3(0.0f, 0.0f, -3.0f));
-			glm::mat4 transfomration = glm::rotate(transMatrix, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+			transMatrix = glm::translate(glm::vec3(0.0f, 0.0f, -3.0f));
+			transfomration = glm::rotate(transMatrix, rot, glm::vec3(1.0f, 0.5f, 0.0f));
 			display.repaint(shader.getProgram(), cube.numIndices, &transfomration);
-			//camera->getPosition()->x = xPos;
-			//camera->getPosition()->y = zPos;
-			rot += 0.01;
+			std::cout << rot << std::endl;
+			rot += 0.05;
 		}
 		SDL_PollEvent(&event);
 	} 

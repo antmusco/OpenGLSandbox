@@ -61,6 +61,12 @@ Display::Display(std::string title, GLushort width, GLushort height)
 	/* Enable depth buffering. */
 	glEnable(GL_DEPTH_TEST);
 
+	/* Blit the background image onto the screen. */
+	screenSurface = SDL_GetWindowSurface(window);
+	backgroundSurface = SDL_LoadBMP("res/background.bmp");
+	SDL_BlitSurface(backgroundSurface, NULL, screenSurface, NULL);
+	SDL_UpdateWindowSurface(window);
+
 	/* Show the version of GLEW currently being used. */
 	fprintf(stdout, "Stats: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 }
@@ -93,19 +99,23 @@ Display::Display(std::string title, GLushort width, GLushort height)
 void Display::repaint(GLuint programID, GLuint numIndicies, 
 	glm::mat4 *transformation)
 {
+	
+	/* Tell OpenGL to clear the color buffer. */
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);	
+
+	SDL_BlitSurface(backgroundSurface, NULL, screenSurface, NULL);
+	SDL_UpdateWindowSurface(window);
+
 	/* Get the window dimensions and update the viewport. */
 	GLint w, h;
 	SDL_GetWindowSize(window, &w, &h);
-	glViewport(0, 0, w, h);
+	glViewport(w*0.2, h*0.2, w*0.6, h*0.6);
 
 	/* Create the transformation matrix and projection matrix. */
 	glm::mat4 fullTransformMatrix = glm::perspective(30.0f, ( (float)w / h ),
-		0.1f, 10.0f) * (*transformation);
+		0.1f, 1000.0f) * (*transformation);
 
 	fullTransformMatrix *= camera.getWorldToViewMatrix();
-	
-	/* Tell OpenGL to clear the color buffer. */
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	/* Get the location of the fullTransformMatrix uniform variable. */
 	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID, 
@@ -153,9 +163,13 @@ void Display::repaint(GLuint programID, GLuint numIndicies,
 *******************************************************************************/
 Display::~Display()
 {
+	/* Deallocate space for the surface. */
+	SDL_FreeSurface(backgroundSurface);
+
 	/* Delete the GL context. */
 	SDL_GL_DeleteContext(context);
 
 	/* Destroy the window. */
 	SDL_DestroyWindow(window);
+
 }

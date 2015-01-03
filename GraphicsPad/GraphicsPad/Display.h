@@ -35,9 +35,13 @@ public:
 /* Private Members.*/
 private:
 	/* Pointer to the SDL Window. */
-	SDL_Window		*window;
+	SDL_Window*		window;
 	/* Pointer to the GL Context. */
 	SDL_GLContext	context;
+	/* Pointer to the window surface. */
+	SDL_Surface*	screenSurface;
+	/* Pointer to the background surface. */
+	SDL_Surface*	backgroundSurface;
 	/* Camera for looking at the world. */
 	Camera			camera;
 };
