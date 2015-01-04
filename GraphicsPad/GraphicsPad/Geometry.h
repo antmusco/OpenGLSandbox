@@ -9,7 +9,7 @@
 #include <glm\glm.hpp>
 #include <vector>
 
-#define NUM_TICKS 11.0f
+#define NUM_TICKS 41.0f
 
 /******************************************************************************
 *                                                                             *

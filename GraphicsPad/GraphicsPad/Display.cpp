@@ -6,6 +6,7 @@
 #include <gl\glew.h>
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
+#include <SDL\SDL_video.h>
 #include <iostream>
 #include "Display.h"
 #include "Geometry.h"
@@ -37,6 +38,10 @@
 *******************************************************************************/
 Display::Display(std::string title, GLushort width, GLushort height) 
 {
+	/* Get the Screen info. */
+	
+
+
 	/* Create the SDL window. */
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, 
 		SDL_WINDOWPOS_CENTERED, width, height, 

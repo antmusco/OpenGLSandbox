@@ -47,7 +47,7 @@ public:
 /* Private members. */
 private:
 	/* Scaling factor for camera rotation. */
-	const float ROTATE_SPEED = 0.005f;
+	const float ROTATE_SPEED = 0.01f;
 	/* Maximum amount of movement for the camera in one update. */
 	const float MAX_MOVEMENT = 50.0f;
 	/* Position vector of the camera. */

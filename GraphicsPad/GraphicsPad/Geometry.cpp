@@ -188,7 +188,7 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 
 	/* Calculate number of vertices and indices.  */
 	plane.numVertices = (GLint) NUM_TICKS * NUM_TICKS;
-	plane.numIndices = 4 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
+	plane.numIndices = 6 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
 
 	/* Allocate heap space. */
 	plane.vertices = new Vertex[plane.numVertices]();
@@ -207,7 +207,6 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 				( ( i - ( ( NUM_TICKS - 1 ) / 2 ) ) * x ) + ( ( j - ( ( NUM_TICKS - 1 ) / 2 ) ) * y ),
 				color
 			};
-			plane.indices[index] = { index };
 		}
 	}
 	
@@ -217,11 +216,16 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 	{
 		for (GLint j = 0; j < NUM_TICKS - 1; j++)
 		{
+			/* Triangle 1. */
 			plane.indices[index + 0] = ( i * NUM_TICKS ) + j; // Top-left
-			plane.indices[index + 3] = ( ( i + 1 ) * NUM_TICKS ) + j; // Bottom-left
-			plane.indices[index + 2] = ( ( i + 1 ) * NUM_TICKS ) + j + 1; // Bottom-right
-			plane.indices[index + 1] = ( i * NUM_TICKS ) + j + 1; // Top-right
-			index += 4;
+			plane.indices[index + 1] = (i * NUM_TICKS) + j + 1; // Top-right
+			plane.indices[index + 2] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
+
+			/* Triangle 2. */
+			plane.indices[index + 3] = ( i * NUM_TICKS ) + j; // Top-left
+			plane.indices[index + 4] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
+			plane.indices[index + 5] = (( i + 1 ) * NUM_TICKS ) + j; // Bottom-left
+			index += 6;
 		}
 	}
 

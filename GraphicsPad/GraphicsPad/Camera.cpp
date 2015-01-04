@@ -27,11 +27,11 @@
 *******************************************************************************/
 Camera::Camera() :
 	/* Center at origin. */
-	position(0.0f, 0.0f, 0.0f),
+	position(0.0f, 2.0f, 0.0f),
 	/* Look along -z axis. */
-	viewDirection(0.0f, 0.0f, -1.0f),
+	viewDirection(0.0f, 2.0f, -1.0f),
 	/* Top of camera is along +y axis. */
-	upDirection(0.0f, 1.0f, 0.0f)
+	upDirection(0.0f, -1.0f, 0.0f)
 {
 }
 
