@@ -154,14 +154,14 @@ void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
 	{
 		/* Generate the full transformation. */
 		fullTransformMatrix = viewToProjectionMatrix *
-			camera.getWorldToViewMatrix() *	(*modelToWorldMatrices.at(i));
+				camera.getWorldToViewMatrix() *	(*modelToWorldMatrices.at(i));
 
 		/* Send the transformation data down to the buffer. */
 		glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
 			&fullTransformMatrix[0][0]);
 
 		/* Draw the elements to the window. */
-		glDrawElements(GL_TRIANGLES, meshes.at(i)->numIndices, 
+		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numIndices, 
 			GL_UNSIGNED_SHORT, (char*)byteOffset);
 
 		/* Update the byte offset. */

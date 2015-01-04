@@ -11,6 +11,61 @@
 #include "Geometry.h"
 #include "Camera.h"
 
+static void handleEvent(SDL_Event* event, Camera* camera)
+{
+	glm::vec3 move;
+	if (event->type == SDL_MOUSEMOTION)
+	{
+		camera->updateLookAt({ event->motion.x, event->motion.y });
+	}
+	else if (event->type == SDL_KEYDOWN)
+	{
+		switch (event->key.keysym.scancode)
+		{
+		case SDL_SCANCODE_D:
+		case SDL_SCANCODE_RIGHT:
+			move = glm::cross(*(camera->getUpDirection()), *(camera->getViewDirection()));
+			move = move / glm::length(move);
+			*( camera->getPosition() ) += move;
+			//*( camera->getViewDirection() ) += move;
+			break;
+		case SDL_SCANCODE_A:
+		case SDL_SCANCODE_LEFT:
+			move = glm::cross(*( camera->getViewDirection() ), *( camera->getUpDirection() ));
+			move = move / glm::length(move);
+			*( camera->getPosition() ) += move;
+			//*( camera->getViewDirection() ) += move;
+			break;
+		case SDL_SCANCODE_S:
+		case SDL_SCANCODE_DOWN:
+			move = *(camera->getUpDirection());
+			move /= glm::length(move);
+			*( camera->getPosition() ) += move;
+			*( camera->getViewDirection() ) += move;
+			break;
+		case SDL_SCANCODE_W:
+		case SDL_SCANCODE_UP:
+			move = *( camera->getUpDirection() );
+			move /= -glm::length(move);
+			*( camera->getPosition() ) += move;
+			*( camera->getViewDirection() ) += move;
+			break;
+		case SDL_SCANCODE_Z:
+			move = *(camera->getViewDirection());
+			move = -1.0f * ( move / glm::length(move) );
+			*( camera->getPosition() ) += move;
+			*( camera->getViewDirection() ) += move;
+			break;
+		case SDL_SCANCODE_X:
+			move = *( camera->getViewDirection() );
+			move /= glm::length(move);
+			*( camera->getPosition() ) += move;
+			*( camera->getViewDirection() ) += move;
+			break;
+		}
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	/* Initialize all subsystems. */
@@ -24,7 +79,7 @@ int main(int argc, char* argv[])
 	std::vector<Mesh*> meshes;
 	Mesh cube = Geometry::makeIsocohedron();
 	Mesh ico = Geometry::makeCube();
-	Mesh plane = Geometry::makePlane({ 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 1.0f});
+	Mesh plane = Geometry::makePlane({ 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f, 0.0f});
 	
 	/*
 	for (int i = 0; i < plane.numVertices; i++)
@@ -124,10 +179,9 @@ int main(int argc, char* argv[])
 	/* Main loop. */
 	while (event.type != SDL_QUIT)
 	{
-		if (event.type == SDL_MOUSEMOTION)
-		{
-			camera->updateLookAt({event.motion.x, event.motion.y});
-		}
+
+		handleEvent(&event, camera);
+
 		if (( clock() - t ) % 10)
 		{
 			float xPos1 =  0; //2 * std::sinf(rot);

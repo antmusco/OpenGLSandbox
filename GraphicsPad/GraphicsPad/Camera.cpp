@@ -31,7 +31,7 @@ Camera::Camera() :
 	/* Look along -z axis. */
 	viewDirection(0.0f, 2.0f, -1.0f),
 	/* Top of camera is along +y axis. */
-	upDirection(0.0f, -1.0f, 0.0f)
+	upDirection(0.0f, 1.0f, 0.0f)
 {
 }
 

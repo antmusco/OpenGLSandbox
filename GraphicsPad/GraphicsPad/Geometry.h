@@ -91,6 +91,7 @@ struct Mesh
 	GLuint		numVertices;
 	GLushort*	indices;
 	GLuint		numIndices;
+	GLenum      drawMode;
 
 	/* Calculate the number of bytes for the vertices. */
 	GLsizeiptr	vertexBufferSize() const

@@ -4,6 +4,7 @@
 *                                                                             *
 ******************************************************************************/
 #include "Geometry.h"
+#include <GL\glew.h>
 #include <glm\glm.hpp>
 #include <map>
 
@@ -32,6 +33,8 @@ Mesh Geometry::makeTriangle()
 {
 	/* Define return mesh. */
 	Mesh mesh;
+
+	mesh.drawMode = GL_TRIANGLES;
 
 	/* Deine vertices. */
 	Vertex triVerts[] =
@@ -93,6 +96,8 @@ Mesh Geometry::makeCube()
 {
 	/* Define return mesh. */
 	Mesh cube;
+
+	cube.drawMode = GL_TRIANGLES;
 
 	/* Deine vertices. */
 	Vertex stackVerts[] = 
@@ -184,6 +189,9 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 {
 	/* Decleare return mesh and color of indices. */
 	Mesh plane;
+
+	plane.drawMode = GL_TRIANGLES;
+
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 
 	/* Calculate number of vertices and indices.  */
@@ -237,6 +245,8 @@ Mesh Geometry::makeIsocohedron()
 {
 	/* Define return mesh. */
 	Mesh ico;
+
+	ico.drawMode = GL_TRIANGLES;
 
 	/* Constant offset. */
 	GLfloat t = (GLfloat)( 1.0 + std::sqrtf(5.0) ) / 2;
