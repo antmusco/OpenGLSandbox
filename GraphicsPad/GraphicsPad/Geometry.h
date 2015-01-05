@@ -8,8 +8,9 @@
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 #include <vector>
+#include <map>
 
-#define NUM_TICKS 41.0f
+#define NUM_TICKS 11.0f
 
 /******************************************************************************
 *                                                                             *
@@ -85,12 +86,12 @@ struct Mesh
 	/* Constructor */
 	Mesh() :
 		vertices(0), numVertices(0),
-		indices(0), numIndices(0) {}
+		faces(0), numFaces(0) {}
 
 	Vertex*		vertices;
 	GLuint		numVertices;
-	GLushort*	indices;
-	GLuint		numIndices;
+	Triangle*	faces;
+	GLuint		numFaces;
 	GLenum      drawMode;
 
 	/* Calculate the number of bytes for the vertices. */
@@ -102,15 +103,15 @@ struct Mesh
 	/* Calculate the number of bytes for the indices. */
 	GLsizeiptr	indexBufferSize() const
 	{
-		return numIndices * sizeof(GLushort);
+		return numFaces * sizeof(Triangle);
 	}
 
 	/* Destructor */ 
 	void cleanUp()
 	{
 		delete[] vertices;
-		delete[] indices;
-		numVertices = numIndices = 0;
+		delete[] faces;
+		numVertices = numFaces = 0;
 	}
 
 };
@@ -133,7 +134,9 @@ class Geometry
 public:
 	static Mesh makeTriangle();
 	static Mesh makeCube();
-	static Mesh makeSphere();
+	static Mesh makeSphere(GLuint tesselation);
 	static Mesh makeIsocohedron();
 	static Mesh makePlane(glm::vec3 x, glm::vec3 y);
+	static GLushort getMiddlePoint(GLushort i1, GLushort i2, 
+		std::vector<Vertex> *verts, std::map<GLuint, GLushort>* cache);
 };

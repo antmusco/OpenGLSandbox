@@ -66,141 +66,142 @@ static void handleEvent(SDL_Event* event, Camera* camera)
 	}
 }
 
+GLuint* genVertexArrayIDs(GLuint numObjects, GLuint* bufferIDs)
+{
+	/* Create array of VAO IDs and generate arrays. */
+	GLuint* vertexArrayIDs = new GLuint[numObjects];
+	glGenVertexArrays(numObjects, vertexArrayIDs);
+
+	for (int i = 0; i < numObjects; i++)
+	{
+		/* Bind this vertex array ID.*/
+		glBindVertexArray(vertexArrayIDs[i]);
+		
+		/* Bind the vertex buffer. */
+		glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[( i * 2 ) + 0]);
+
+		/* Vertex position attribute. */
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+
+		/* Vertex color attribute. */
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)( sizeof(GLfloat) * 3 ));
+		
+		/* Bind the index buffer. */
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[( i * 2 ) + 1]);
+	}
+
+	/* Return the vertex array IDs. */
+	return vertexArrayIDs;
+}
+
+GLuint* genBufferArrayIDs(std::vector<Mesh*>* meshes)
+{
+	const GLuint NUM_BUFFERS = 2;
+	GLuint* bufferIDs = new GLuint[NUM_BUFFERS * meshes->size()];
+
+	glGenBuffers(NUM_BUFFERS * meshes->size(), bufferIDs);
+	for (int i = 0; i < meshes->size(); i++)
+	{
+		/* Create vertex buffer. */
+		glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[( i * NUM_BUFFERS ) + 0]);
+		glBufferData(GL_ARRAY_BUFFER, meshes->at(i)->vertexBufferSize(),
+			meshes->at(i)->vertices, GL_STATIC_DRAW);
+
+		/* Create index buffer. */
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[( i * NUM_BUFFERS ) + 1]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshes->at(i)->indexBufferSize(),
+			meshes->at(i)->faces, GL_STATIC_DRAW);
+	
+	}
+
+	/* Return buffer IDs */
+	return bufferIDs;
+}
+
 int main(int argc, char* argv[])
 {
 	/* Initialize all subsystems. */
 	SDL_Init(SDL_INIT_EVERYTHING);
+
 	/* Create the display. */
 	Display display("Display", 800, 600);
 	Shader shader("shader.vs", "shader.fs");
 	Camera* camera = display.getCamera();
 
-	/* Create a list of two cubes (instancing) */
+	/* Create the geometries. */
+	Mesh shape1 = Geometry::makeSphere(0);
+	Mesh shape2 = Geometry::makeSphere(1);
+	Mesh shape3 = Geometry::makeSphere(2);
+	Mesh shape4 = Geometry::makeSphere(3);
+
+	/* Add geometries to the list of meshes. */
 	std::vector<Mesh*> meshes;
-	Mesh cube = Geometry::makeIsocohedron();
-	Mesh ico = Geometry::makeCube();
-	Mesh plane = Geometry::makePlane({ 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f, 0.0f});
-	
-	/*
-	for (int i = 0; i < plane.numVertices; i++)
-	{
-		std::cout << "Vertex  "<< i << "\t| Position {"
-			<< " x: " << ( plane.vertices + i )->position.x 
-			<< " y: " << ( plane.vertices + i )->position.y
-			<< " z: " << ( plane.vertices + i )->position.z
-			<< "} \t| Color {" 
-			<< " r: " << ( plane.vertices + i )->color.r
-			<< " g: " << ( plane.vertices + i )->color.g
-			<< " b: " << ( plane.vertices + i )->color.b
-			<< "}"
-			<< std::endl;
-	}
+	meshes.push_back(&shape1);
+	meshes.push_back(&shape2);
+	meshes.push_back(&shape3);
+	meshes.push_back(&shape4);
 
-	for (int i = 0; i < plane.numIndices / 3; i++)
-	{
-		std::cout << "Tri " << i << "\t| {";
-		for (int j = 0; j < 2; j++)
-		{
-			std::cout << *( plane.indices + ( i * 3 ) + j ) << ", ";
-		}
-		std::cout << *( plane.indices + ( i * 3 ) + 2 ) << "}" << std::endl;
-	}
-	*/
+	/* Generate Vertex/Index Buffers */
+	GLuint* bufferIDs = genBufferArrayIDs(&meshes);
 
-	meshes.push_back(&cube);
-	meshes.push_back(&ico);
-	meshes.push_back(&plane);
+	/* Generate the vertex array IDs */
+	GLuint* vertexArrayIDs = genVertexArrayIDs(meshes.size(), bufferIDs);
 
-	for (int i = 0; i < ico.numIndices; i++)
-		*( ico.indices + i ) += cube.numVertices;
+	/* Create the vector of matrix transformations. */
+	glm::mat4 shape1Trans;
+	glm::mat4 shape2Trans; 
+	glm::mat4 shape3Trans; 
+	glm::mat4 shape4Trans;
 
-	for (int i = 0; i < plane.numIndices; i++)
-		*( plane.indices + i ) += (cube.numVertices + ico.numVertices);
-
-	/* Generate vertex buffer. */
-	GLuint vertexBufferID;
-	glGenBuffers(1, &vertexBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	GLuint bufferOffset = cube.vertexBufferSize() + ico.vertexBufferSize() + plane.vertexBufferSize();
-	glBufferData(GL_ARRAY_BUFFER, bufferOffset, 0, GL_STATIC_DRAW);
-	bufferOffset = 0;
-	glBufferSubData(GL_ARRAY_BUFFER, bufferOffset, cube.vertexBufferSize(), cube.vertices);
-	bufferOffset += cube.vertexBufferSize();
-	glBufferSubData(GL_ARRAY_BUFFER, bufferOffset, ico.vertexBufferSize(), ico.vertices);
-	bufferOffset += ico.vertexBufferSize();
-	glBufferSubData(GL_ARRAY_BUFFER, bufferOffset, plane.vertexBufferSize(), plane.vertices);
-
-	/* Vertex position attribute. */
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
-
-	/* Vertex color attribute. */
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (char*)(sizeof(GLfloat) * 3));
-
-	/* Generate index buffer. */
-	GLuint indexBufferID;
-	glGenBuffers(1, &indexBufferID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	bufferOffset = cube.indexBufferSize() + ico.indexBufferSize() + plane.indexBufferSize();
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferOffset, 0, GL_STATIC_DRAW);
-	bufferOffset = 0;
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, bufferOffset, cube.indexBufferSize(), cube.indices);
-	bufferOffset += cube.indexBufferSize();
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, bufferOffset, ico.indexBufferSize(), ico.indices);
-	bufferOffset += ico.indexBufferSize();
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, bufferOffset, plane.indexBufferSize(), plane.indices);
-
-	/************** Playing with uniform values... *************/
-	//glm::vec3 dominatingColor(1.0f, 0.0f, 0.0f);
-	//GLfloat yFlip = 1.0;
-	//GLint dominatingColorUniformLocation = glGetUniformLocation(shader.getProgram(), "dominatingColor");
-	//GLint yFlipUniformLocation = glGetUniformLocation(shader.getProgram(), "yFlip");
-	//glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
-	//glUniform1f(yFlipUniformLocation, yFlip);
-	/***********************************************************/
+	std::vector<glm::mat4*> modelToWorldMatrices;
+	modelToWorldMatrices.push_back(&shape1Trans);
+	modelToWorldMatrices.push_back(&shape2Trans);
+	modelToWorldMatrices.push_back(&shape3Trans);
+	modelToWorldMatrices.push_back(&shape4Trans);
+	std::clock_t t = clock();
 
 	SDL_Event event;
 	SDL_PollEvent(&event);
 	GLfloat rot  = 0.0f,
-		    xPos1 = 0.0f, xPos2 = 0.0f,
-            yPos1 = 0.0f, yPos2 = 0.0f,
-            zPos1 = 0.0f, zPos2 = 0.0f;
-
-	/* Create the vector of matrix transformations. */
-	std::vector<glm::mat4*> modelToWorldMatrices;
-	glm::mat4 cubeTrans, icoTrans, identity;
-	modelToWorldMatrices.push_back(&cubeTrans);
-	modelToWorldMatrices.push_back(&icoTrans);
-	modelToWorldMatrices.push_back(&identity);
-
-	std::clock_t t = clock();
+		xPos1 = -4.0f, xPos2 = -2.0f, xPos3 = +0.0f, xPos4 = +2.0f,
+		yPos1 = +0.0f, yPos2 = +0.0f, yPos3 = +0.0f, yPos4 = +0.0f,
+		zPos1 = -3.0f, zPos2 = -3.0f, zPos3 = -3.0f, zPos4 = -3.0f;
 
 	/* Main loop. */
 	while (event.type != SDL_QUIT)
 	{
-
+		/* Handle the event. */
 		handleEvent(&event, camera);
 
 		if (( clock() - t ) % 10)
 		{
-			float xPos1 =  0; //2 * std::sinf(rot);
-			float yPos1 =  2; //2 * std::cosf(rot) - 5;
-			float zPos1 = -7; //std::sinf(rot) - 5;
-			float xPos2 =  3; //2 * std::cosf(2*rot) - 5;
-			float yPos2 =  0; //std::cosf(3 * rot);
-			float zPos2 = -2;
-			cubeTrans = glm::translate(glm::vec3(xPos1, yPos1, zPos1)) *
-				         glm::rotate(rot, glm::vec3(1.0f, 0.5f, 0.0f));
-			icoTrans = glm::translate(glm::vec3(xPos2, yPos2, zPos2)) *
-				         glm::rotate(-rot, glm::vec3(1.0f, 0.5f, 0.0f));
-			display.repaint(shader.getProgram(), meshes, modelToWorldMatrices);
+			shape1Trans = glm::translate(glm::vec3(xPos1, yPos1, zPos1)) *
+				          glm::rotate(rot, glm::vec3(1.0f, 0.5f, 0.0f));
+			shape2Trans = glm::translate(glm::vec3(xPos2, yPos2, zPos2)) *
+				          glm::rotate(-rot, glm::vec3(0.0f, 0.5f, 1.0f));
+			shape3Trans = glm::translate(glm::vec3(xPos3, yPos3, zPos3)) *
+						  glm::rotate(rot, glm::vec3(0.0f, 1.0f, 5.0f));
+			shape4Trans = glm::translate(glm::vec3(xPos4, yPos4, zPos4)) *
+						  glm::rotate(-rot, glm::vec3(1.0f, 0.0f, 5.0f));
+			display.repaint(shader.getProgram(), meshes, modelToWorldMatrices, vertexArrayIDs);
 			rot += 0.001f;
 		}
 		SDL_PollEvent(&event);
 	}
 
-	cube.cleanUp();
+	/* Free the shapes. */
+	shape1.cleanUp(); 
+	shape2.cleanUp(); 
+	shape3.cleanUp(); 
+	shape4.cleanUp();
+
+	/* Free the buffers. */
+	glDeleteBuffers(meshes.size(), vertexArrayIDs);
+	glDeleteBuffers(meshes.size() * 2, bufferIDs);
+	delete[] vertexArrayIDs;
+	delete[] bufferIDs;
 
 	/* Quit using SDL. */
 	SDL_Quit();

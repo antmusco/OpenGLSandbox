@@ -6,9 +6,9 @@
 #include "Geometry.h"
 #include <GL\glew.h>
 #include <glm\glm.hpp>
-#include <map>
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(*a)
+#define NUM_BUFFERS 2
 
 /******************************************************************************
 *                                                                             *
@@ -32,12 +32,12 @@
 Mesh Geometry::makeTriangle()
 {
 	/* Define return mesh. */
-	Mesh mesh;
+	Mesh triangle;
 
-	mesh.drawMode = GL_TRIANGLES;
+	triangle.drawMode = GL_TRIANGLES;
 
 	/* Deine vertices. */
-	Vertex triVerts[] =
+	Vertex localVerts[] =
 	{
 		glm::vec3(+0.0f, +1.0f, +0.0f),// 0
 		glm::vec3(+1.0f, +0.0f, +0.0f),
@@ -50,27 +50,27 @@ Mesh Geometry::makeTriangle()
 	};
 
 	/* Record the number of vertices. */
-	mesh.numVertices = ARRAY_SIZE(triVerts);
+	triangle.numVertices = ARRAY_SIZE(localVerts);
 	
 	/* Allocate memory on the heap and copy data from stack. */
-	mesh.vertices = new Vertex[mesh.numVertices];
-	memcpy(mesh.vertices, triVerts, sizeof(triVerts));
+	triangle.vertices = new Vertex[triangle.numVertices];
+	memcpy(triangle.vertices, localVerts, sizeof(localVerts));
 
 	/* Define indices. */
-	GLushort triIndices[] =
+	Triangle localFaces[] =
 	{
-		0, 1, 2
+		{ 0, 1, 2 }
 	};
 
 	/* Record the number of indices. */
-	mesh.numIndices = ARRAY_SIZE(triIndices);
+	triangle.numFaces = ARRAY_SIZE(localFaces);
 
 	/* Allocate memory on the heap and copy data from stack. */
-	mesh.indices = new GLushort[mesh.numIndices];
-	memcpy(mesh.indices, triIndices, sizeof(triIndices));
+	triangle.faces = new Triangle[triangle.numFaces];
+	memcpy(triangle.faces, localFaces, sizeof(localFaces));
 
 	/* Return Mesh. */
-	return mesh;
+	return triangle;
 }
 
 /******************************************************************************
@@ -100,7 +100,7 @@ Mesh Geometry::makeCube()
 	cube.drawMode = GL_TRIANGLES;
 
 	/* Deine vertices. */
-	Vertex stackVerts[] = 
+	Vertex localVerts[] =
 	{
 		glm::vec3(-1.0f, +1.0f, +1.0f), // 0
 		glm::vec3(+1.0f, +0.0f, +0.0f), // Colour
@@ -158,28 +158,28 @@ Mesh Geometry::makeCube()
 	};
 
 	/* Record the number of vertices. */
-	cube.numVertices = ARRAY_SIZE(stackVerts);
+	cube.numVertices = ARRAY_SIZE(localVerts);
 
 	/* Allocate memory on the heap and copy data from stack. */
 	cube.vertices = new Vertex[cube.numVertices];
-	memcpy(cube.vertices, stackVerts, sizeof(stackVerts));
+	memcpy(cube.vertices, localVerts, sizeof(localVerts));
 
 	/* Define indices. */
-	unsigned short stackIndices[] = {
-		0, 1, 2, 0, 2, 3, // Top
-		4, 5, 6, 4, 6, 7, // Front
-		8, 9, 10, 8, 10, 11, // Right
-		12, 13, 14, 12, 14, 15, // Left
-		16, 17, 18, 16, 18, 19, // Back
-		20, 22, 21, 20, 23, 22, // Bottom
+	Triangle localFaces[] = {
+		{  0,  1,  2 }, {  0,  2,  3 }, // Top
+		{  4,  5,  6 }, {  4,  6,  7 }, // Front
+		{  8,  9, 10 }, {  8, 10, 11 }, // Right
+		{ 12, 13, 14 }, { 12, 14, 15 }, // Left
+		{ 16, 17, 18 }, { 16, 18, 19 }, // Back
+		{ 20, 22, 21 }, { 20, 23, 22 }, // Bottom
 	};
 
 	/* Record the number of indices. */
-	cube.numIndices = ARRAY_SIZE(stackIndices);
+	cube.numFaces = ARRAY_SIZE(localFaces);
 
 	/* Allocate memory on the heap and copy data from stack. */
-	cube.indices = new GLushort[cube.numIndices];
-	memcpy(cube.indices, stackIndices, sizeof(stackIndices));
+	cube.faces = new Triangle[cube.numFaces];
+	memcpy(cube.faces, localFaces, sizeof(localFaces));
 
 	/* Return mesh. */
 	return cube;
@@ -196,11 +196,11 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 
 	/* Calculate number of vertices and indices.  */
 	plane.numVertices = (GLint) NUM_TICKS * NUM_TICKS;
-	plane.numIndices = 6 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
+	plane.numFaces = 6 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
 
 	/* Allocate heap space. */
-	plane.vertices = new Vertex[plane.numVertices]();
-	plane.indices = new GLushort[plane.numIndices]();
+	plane.vertices = new Vertex[plane.numVertices];
+	plane.faces = new Triangle[plane.numFaces];
 
 	GLushort index = 0;
 
@@ -225,15 +225,18 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 		for (GLint j = 0; j < NUM_TICKS - 1; j++)
 		{
 			/* Triangle 1. */
-			plane.indices[index + 0] = ( i * NUM_TICKS ) + j; // Top-left
-			plane.indices[index + 1] = (i * NUM_TICKS) + j + 1; // Top-right
-			plane.indices[index + 2] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
+			plane.faces[index++] = {
+				( i * NUM_TICKS ) + j, // Top-left
+				( i * NUM_TICKS ) + j + 1, // Top-right
+				( ( i + 1 ) * NUM_TICKS ) + j + 1 // Bottom-right
+			};
 
 			/* Triangle 2. */
-			plane.indices[index + 3] = ( i * NUM_TICKS ) + j; // Top-left
-			plane.indices[index + 4] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
-			plane.indices[index + 5] = (( i + 1 ) * NUM_TICKS ) + j; // Bottom-left
-			index += 6;
+			plane.faces[index++] = {
+				( i * NUM_TICKS ) + j, // Top-left
+				( ( i + 1 ) * NUM_TICKS ) + j + 1, // Bottom-right
+				( ( i + 1 ) * NUM_TICKS ) + j, // Bottom-left
+			};
 		}
 	}
 
@@ -254,7 +257,7 @@ Mesh Geometry::makeIsocohedron()
 	/* Define the vertices locally. */
 	Vertex localVerts[] = {
 
-		glm::vec3(-1.0, +t, +0.0), // 0
+		glm::vec3(-1.0, +t, +0.0), // 0 - Top
 		glm::vec3(+1.0, +t, +0.0), // Color
 
 		glm::vec3(+1.0, +t, +0.0), // 1
@@ -293,47 +296,47 @@ Mesh Geometry::makeIsocohedron()
 	};
 
 	/* Define the faces locally. */
-	GLushort localIndices[] =
+	Triangle localFaces[] =
 	{
 		/* 5 faces around point 0 */
-		0, 11, 5,
-		0, 5, 1,
-		0, 1, 7,
-		0, 7, 10,
-		0, 10, 11,
+		{  0, 11,  5 },
+		{  0,  5,  1 },
+		{  0,  1,  7 },
+		{  0,  7, 10 },
+		{  0, 10, 11 },
 		/* 5 adjacent faces */
-		1, 5, 9,
-		5, 11, 4,
-		11, 10, 2,
-		10, 7, 6,
-		7, 1, 8,
+		{  1,  5,  9 },
+		{  5, 11,  4 },
+		{ 11, 10,  2 },
+		{ 10,  7,  6 },
+		{  7,  1,  8 },
 		/* 5 faces around point 3 */
-		3, 9, 4,
-		3, 4, 2,
-		3, 2, 6,
-		3, 6, 8,
-		3, 8, 9,
+		{  3,  9,  4 },
+		{  3,  4,  2 },
+		{  3,  2,  6 },
+		{  3,  6,  8 },
+		{  3,  8,  9 },
 		/* 5 adjacent faces. */
-		4, 9, 5,
-		2, 4, 11,
-		6, 2, 10,
-		8, 6, 7,
-		9, 8, 1,
+		{  4,  9,  5 },
+		{  2,  4, 11 },
+		{  6,  2, 10 },
+		{  8,  6,  7 },
+		{  9,  8,  1 },
 	};
-	
+
 	/* Record the number of vertices. */
 	ico.numVertices = ARRAY_SIZE(localVerts);
 
 	/* Allocate memory on the heap and copy data from stack. */
 	ico.vertices = new Vertex[ico.numVertices];
-	std::copy(localVerts, (localVerts + ico.numVertices), ico.vertices);
+	memcpy(ico.vertices, localVerts, sizeof(localVerts));
 
 	/* Record the number of indices. */
-	ico.numIndices = ARRAY_SIZE(localIndices);
+	ico.numFaces = ARRAY_SIZE(localFaces);
 
 	/* Allocate memory on the heap and copy data from stack. */
-	ico.indices = new GLushort[ico.numIndices];
-	std::copy(localIndices, localIndices + ico.numIndices, ico.indices);
+	ico.faces = new Triangle[ico.numFaces];
+	memcpy(ico.faces, localFaces, sizeof(localFaces));
 
 	/* Return mesh. */
 	return ico;
@@ -358,85 +361,134 @@ Mesh Geometry::makeIsocohedron()
 *  caller must be sure to free the memory once the mesh is no longer needed.  *
 *                                                                             *
 *******************************************************************************/
-//Mesh Geometry::makeSphere()
-//{
-//	/* Define return mesh. */
-//	Mesh sphere;
-//
-//	std::map<GLuint, GLushort> middlePointIndexCache;
-//
-//	/* Generate vertices and faces. */
-//	std::vector<Vertex> verts;
-//	std::vector<Triangle> faces;
-//	genIcosohedron(&verts, &faces);
-//
-//	/* Loop and normalize. */
-//	for (int i = 0; i < 5; i++)
-//	{
-//		std::vector<Triangle> newFaces;
-//		for (Triangle tri : faces)
-//		{
-//			GLushort a = getMiddlePoint(tri.v1, tri.v2, &verts, &middlePointIndexCache);
-//			GLushort b = getMiddlePoint(tri.v2, tri.v3, &verts, &middlePointIndexCache);
-//			GLushort c = getMiddlePoint(tri.v3, tri.v1, &verts, &middlePointIndexCache);
-//
-//			newFaces.push_back({ tri.v1, a, c });
-//			newFaces.push_back({ tri.v2, b, a });
-//			newFaces.push_back({ tri.v3, c, b });
-//			newFaces.push_back({      a, b, c });
-//		}
-//		faces = newFaces;
-//	}
-//
-//
-//
-//
-//	/* Record the number of vertices. */
-//	shpere.numVertices = ARRAY_SIZE(stackVerts);
-//
-//	/* Allocate memory on the heap and copy data from stack. */
-//	cube.vertices = new Vertex[cube.numVertices];
-//	memcpy(cube.vertices, stackVerts, sizeof(stackVerts));
-//
-//	/* Define indices. */
-//	unsigned short stackIndices[] = {
-//		0, 1, 2, 0, 2, 3, // Top
-//		4, 5, 6, 4, 6, 7, // Front
-//		8, 9, 10, 8, 10, 11, // Right
-//		12, 13, 14, 12, 14, 15, // Left
-//		16, 17, 18, 16, 18, 19, // Back
-//		20, 22, 21, 20, 23, 22, // Bottom
-//	};
-//
-//	/* Record the number of indices. */
-//	cube.numIndices = ARRAY_SIZE(stackIndices);
-//
-//	/* Allocate memory on the heap and copy data from stack. */
-//	cube.indices = new GLushort[cube.numIndices];
-//	memcpy(cube.indices, stackIndices, sizeof(stackIndices));
-//
-//	/* Return mesh. */
-//	return cube;
-//}
-//
-//GLushort getMiddlePoint(GLushort i1, GLushort i2, std::vector<Vertex> *verts, std::map<GLuint, GLushort>* cache)
-//{
-//	bool firstSmaller = i1 < i2;
-//	GLushort smaller = ( firstSmaller ) ? i1 : i2;
-//	GLushort larger = ( firstSmaller ) ? i2 : i1;
-//	GLuint key = ( smaller << 16 ) + larger;
-//
-//	/* If the middle value exists, return the index value. */
-//	if (cache->count(key))
-//		return cache->at(key);
-//
-//	/* Otherwise, the value is not in cache and must be calculated. */
-//	Vertex v1 = verts->at(i1);
-//	Vertex v2 = verts->at(i2);
-//	Vertex middle = { (v1.position + v2.position), (v1.color + v2.color)};
-//	middle.color /= 2;
-//	middle.position /= 2;
-//
-//
-//
-//}
+Mesh Geometry::makeSphere(GLuint tesselation)
+{
+	/* Define return mesh and cahce for tessellating the sphere. */
+	Mesh sphere;
+	Mesh ico = Geometry::makeIsocohedron();
+	std::map<GLuint, GLushort> middlePointIndexCache;
+
+	/* Define the draw mode for the geometry. */
+	sphere.drawMode = GL_TRIANGLES;
+
+	/* Constant offset. */
+	GLfloat t = (GLfloat)( 1.0 + std::sqrtf(5.0) ) / 2;
+
+	sphere.numFaces = ico.numFaces;
+	sphere.numVertices = ico.numVertices;
+
+	/* Get the vertices from icosohedron. */
+	std::vector<Vertex> localVerts;
+	for (int i = 0; i < ico.numVertices; i++)
+		localVerts.push_back(ico.vertices[i]);
+
+	/* Get the faces from the icosohedron. */
+	std::vector<Triangle> localFaces;
+	for (int i = 0; i < ico.numFaces; i++)
+		localFaces.push_back(ico.faces[i]);
+
+	/* Normalize the position of the vertices. */
+	for (int i = 0; i < localVerts.size(); i++)
+		localVerts.at(i).position /= glm::length(localVerts.at(i).position);
+
+	/* Temp variables for looping. */
+	GLushort a, b, c;
+
+	/* Tesselate and normalize. */
+	for (int i = 0; i < tesselation; i++)
+	{
+		std::vector<Triangle> newFaces;
+
+		/* Split each triangle into 4 new triangles. */
+		for (Triangle tri : localFaces)
+		{
+			/* Get the middle points of each side of the triangle. */
+			a = getMiddlePoint(tri.v1, tri.v2, &localVerts, 
+					&middlePointIndexCache);
+			b = getMiddlePoint(tri.v2, tri.v3, &localVerts,
+					&middlePointIndexCache);
+			c = getMiddlePoint(tri.v3, tri.v1, &localVerts, 
+					&middlePointIndexCache);
+
+			/* Add 4 new triangles in place of 'tri' in the new vector. */
+			newFaces.push_back({ tri.v1, a, c });
+			newFaces.push_back({ tri.v2, b, a });
+			newFaces.push_back({ tri.v3, c, b });
+			newFaces.push_back({ a, b, c });
+
+		}
+
+		/* Update the vector of local faces. */
+		localFaces = newFaces;
+	}
+
+	/* Copy over the local vertex data. */
+	sphere.numVertices = localVerts.size();
+	sphere.vertices = new Vertex[sphere.numVertices];
+	memcpy(sphere.vertices, localVerts.data(), localVerts.size() * sizeof(Vertex));
+
+	/* Copy over the local face data. */
+	sphere.numFaces = localFaces.size();
+	sphere.faces = new Triangle[sphere.numFaces];
+	memcpy(sphere.faces, localFaces.data(), localFaces.size() * sizeof(Triangle));
+	
+	/* Return the mesh. */
+	return sphere;
+}
+
+/******************************************************************************
+*                                                                             *
+*                       Geometry::getMiddlePoint (static)                     *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  i1                                                                         *
+*           Index of the first point.                                         *
+*  i2                                                                         *
+*           Index of the second point.                                        *
+*  verts                                                                      *
+*           Pointer to the vector containing all of the vertices.             *
+*  cache                                                                      *
+*           Pointer to the cache of already-generated index points.           *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  The index of the point between the indicated indices.                      *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Static function which takes in two indices and returns the index of the    *
+*  point between them, located on the unit shpere. The points are stored in   *
+*  cache as they are generated, so that future calls to this function will    *
+*  remember the previous values.                                              *
+*                                                                             *
+*******************************************************************************/
+GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2, 
+	std::vector<Vertex> *verts, std::map<GLuint, GLushort>* cache)
+{
+	/* Generate the key for mapping the index.*/ 
+	bool firstSmaller = i1 < i2;
+	GLushort smaller = ( firstSmaller ) ? i1 : i2;
+	GLushort larger = ( firstSmaller ) ? i2 : i1;
+
+	/*key = smaller * 2^10 + larger */
+	GLuint key = ( smaller << 10 ) + larger;
+
+	/* If the middle value exists, return the index value. */
+	if (cache->count(key) != 0)
+		return cache->at(key);
+
+	/* Otherwise, the value is not in cache and must be calculated. */
+	Vertex v1 = verts->at(i1);
+	Vertex v2 = verts->at(i2);
+	Vertex middle = { (v1.position + v2.position) * 0.5f, (v1.color + v2.color) * 0.5f};
+	middle.position /= glm::length(middle.position);
+
+	/* Add the new vertex to verts and map the index to the cache. */
+	GLushort index = verts->size();
+	verts->push_back(middle);
+	( *cache )[key] = index;
+
+	/* Return the index of the vertex. */
+	return index;
+}

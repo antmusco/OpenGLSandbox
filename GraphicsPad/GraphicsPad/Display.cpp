@@ -133,7 +133,8 @@ void Display::updateViewport()
 *                                                                             *
 *******************************************************************************/
 void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
-                      std::vector<glm::mat4*> modelToWorldMatrices)
+                      std::vector<glm::mat4*> modelToWorldMatrices,
+					  GLuint* vertexArrayIDs)
 {
 	/* Tell OpenGL to clear the color buffer and depth buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);	
@@ -149,23 +150,23 @@ void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
 	glm::mat4 fullTransformMatrix;
 
 	/* Display Meshes. */
-	GLuint byteOffset = 0;
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
 		/* Generate the full transformation. */
 		fullTransformMatrix = viewToProjectionMatrix *
 				camera.getWorldToViewMatrix() *	(*modelToWorldMatrices.at(i));
 
+		/* Bind the appropriate vertex array. */
+		glBindVertexArray(vertexArrayIDs[i]);
+
 		/* Send the transformation data down to the buffer. */
 		glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
 			&fullTransformMatrix[0][0]);
 
 		/* Draw the elements to the window. */
-		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numIndices, 
-			GL_UNSIGNED_SHORT, (char*)byteOffset);
+		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numFaces * 3, 
+			GL_UNSIGNED_SHORT, 0);
 
-		/* Update the byte offset. */
-		byteOffset += meshes.at(i)->indexBufferSize();
 	}
 
 	/* Swap the double buffer. */

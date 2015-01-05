@@ -13,8 +13,11 @@
 #include "Camera.h"
 #include "Geometry.h"
 
+/* Field of View parameter. */
 #define  FOV   30.0f
+/* Near clipping plane parameter. */
 #define  NEAR   0.1f
+/* Far clipping plane parameter. */
 #define  FAR   50.0f
 
 /******************************************************************************
@@ -33,7 +36,8 @@ public:
 	void updateViewport();
 	/* repaint */
 	void repaint(GLuint programID, std::vector<Mesh*> meshes,
-                 std::vector<glm::mat4*> modelToWorldMatrices);
+                 std::vector<glm::mat4*> modelToWorldMatrices,
+				 GLuint* vertexArrayIDs);
 	void setClearColor(GLclampf red, GLclampf blue, GLclampf green, 
 		GLclampf alpha)
 	{
