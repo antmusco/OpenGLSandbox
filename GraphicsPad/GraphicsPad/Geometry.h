@@ -9,8 +9,10 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include <map>
+#include "Shader.h"
 
 #define NUM_TICKS 11.0f
+#define NUM_BUFFERS 2
 
 /******************************************************************************
 *                                                                             *
@@ -60,7 +62,7 @@ struct Triangle
 
 /******************************************************************************
 *                                                                             *
-*                           Geometry::Mesh   (struct)                         *
+*                           Geometry::Mesh   (class)                          *
 *                                                                             *
 *******************************************************************************
 * MEMBERS                                                                     *
@@ -76,27 +78,23 @@ struct Triangle
 *                                                                             *
 *******************************************************************************
 * DESCRIPTION                                                                 *
-*  Struct representing a collection of vertices in 3-D space representing an  *
+*  Class representing a collection of vertices in 3-D space representing an   *
 *  object. All vertices are only recorded once, with the indexes indicating   *
 *  the draw order for each vertex.                                            *
 *                                                                             *
 *******************************************************************************/
-struct Mesh
+class Mesh
 {
+public:
 	/* Constructor */
 	Mesh() :
 		vertices(0), numVertices(0),
 		faces(0), numFaces(0) {}
 
-	Vertex*		vertices;
-	GLuint		numVertices;
-	Triangle*	faces;
-	GLuint		numFaces;
-	GLenum      drawMode;
-
 	/* Calculate the number of bytes for the vertices. */
 	GLsizeiptr	vertexBufferSize() const
 	{
+		int x = sizeof(Vertex);
 		return numVertices * sizeof(Vertex);
 	}
 
@@ -106,14 +104,19 @@ struct Mesh
 		return numFaces * sizeof(Triangle);
 	}
 
-	/* Destructor */ 
-	void cleanUp()
-	{
-		delete[] vertices;
-		delete[] faces;
-		numVertices = numFaces = 0;
-	}
+	void genBufferArrayID();
+	void genVertexArrayID();
 
+	/* Destructor */ 
+	void cleanUp();
+
+	Vertex*			vertices;
+	GLuint			numVertices;
+	Triangle*		faces;
+	GLuint			numFaces;
+	GLuint*			bufferIDs;
+	GLuint			vertexArrayID;
+	GLenum			drawMode;
 };
 
 /******************************************************************************
@@ -132,11 +135,13 @@ struct Mesh
 class Geometry
 {
 public:
+	static Shader*	shader;
 	static Mesh makeTriangle();
 	static Mesh makeCube();
 	static Mesh makeSphere(GLuint tesselation);
 	static Mesh makeIsocohedron();
 	static Mesh makePlane(glm::vec3 x, glm::vec3 y);
+	static Mesh makeCoordinatePlane();
 	static GLushort getMiddlePoint(GLushort i1, GLushort i2, 
 		std::vector<Vertex> *verts, std::map<GLuint, GLushort>* cache);
 };

@@ -8,7 +8,8 @@
 #include <glm\glm.hpp>
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(*a)
-#define NUM_BUFFERS 2
+
+Shader* Geometry::shader = NULL;
 
 /******************************************************************************
 *                                                                             *
@@ -68,6 +69,10 @@ Mesh Geometry::makeTriangle()
 	/* Allocate memory on the heap and copy data from stack. */
 	triangle.faces = new Triangle[triangle.numFaces];
 	memcpy(triangle.faces, localFaces, sizeof(localFaces));
+
+	/* Generate buffer and vertex arrays. */
+	triangle.genBufferArrayID();
+	triangle.genVertexArrayID();
 
 	/* Return Mesh. */
 	return triangle;
@@ -169,7 +174,7 @@ Mesh Geometry::makeCube()
 		{  0,  1,  2 }, {  0,  2,  3 }, // Top
 		{  4,  5,  6 }, {  4,  6,  7 }, // Front
 		{  8,  9, 10 }, {  8, 10, 11 }, // Right
-		{ 12, 13, 14 }, { 12, 14, 15 }, // Left
+		{ 12, 14, 13 }, { 12, 14, 15 }, // Left
 		{ 16, 17, 18 }, { 16, 18, 19 }, // Back
 		{ 20, 22, 21 }, { 20, 23, 22 }, // Bottom
 	};
@@ -180,6 +185,10 @@ Mesh Geometry::makeCube()
 	/* Allocate memory on the heap and copy data from stack. */
 	cube.faces = new Triangle[cube.numFaces];
 	memcpy(cube.faces, localFaces, sizeof(localFaces));
+
+	/* Generate buffer and vertex arrays. */
+	cube.genBufferArrayID();
+	cube.genVertexArrayID();
 
 	/* Return mesh. */
 	return cube;
@@ -240,9 +249,30 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 		}
 	}
 
+	/* Generate buffer and vertex arrays. */
+	plane.genBufferArrayID();
+	plane.genVertexArrayID();
+
 	/* Return the mesh. */
 	return plane;
 }
+
+//Mesh Geometry::makeCoordinatePlane()
+//{
+//	/* Define mesh. */
+//	Mesh coordPlane;
+//	coordPlane.drawMode = GL_LINES;
+//	coordPlane.vertices = new Vertex[4 * 2 * 30];
+//	coordPlane.faces = new 
+//	for (int i = 0; i < 60; i++)
+//	{
+//		coordPlane.vertices[i] = glm::vec3(i - 30f, -30, 0);
+//		coordPlane.vertices[i] = glm::vec3(i - 30f, +30, 0);
+//		coordPlane.vertices[i] = glm::vec3(-30f, i - 30, 0);
+//		coordPlane.vertices[i] = glm::vec3(+30f, i - 30, 0);
+//	}
+//
+//}
 
 Mesh Geometry::makeIsocohedron()
 {
@@ -338,6 +368,10 @@ Mesh Geometry::makeIsocohedron()
 	ico.faces = new Triangle[ico.numFaces];
 	memcpy(ico.faces, localFaces, sizeof(localFaces));
 
+	/* Generate buffer and vertex arrays. */
+	ico.genBufferArrayID();
+	ico.genVertexArrayID();
+
 	/* Return mesh. */
 	return ico;
 }
@@ -432,6 +466,10 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	sphere.faces = new Triangle[sphere.numFaces];
 	memcpy(sphere.faces, localFaces.data(), localFaces.size() * sizeof(Triangle));
 	
+	/* Generate buffer and vertex arrays. */
+	sphere.genBufferArrayID();
+	sphere.genVertexArrayID();
+
 	/* Return the mesh. */
 	return sphere;
 }
@@ -481,7 +519,8 @@ GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2,
 	/* Otherwise, the value is not in cache and must be calculated. */
 	Vertex v1 = verts->at(i1);
 	Vertex v2 = verts->at(i2);
-	Vertex middle = { (v1.position + v2.position) * 0.5f, (v1.color + v2.color) * 0.5f};
+	Vertex middle = { (v1.position + v2.position) * 0.5f, 
+					  (v1.color + v2.color) * 0.5f };
 	middle.position /= glm::length(middle.position);
 
 	/* Add the new vertex to verts and map the index to the cache. */
@@ -491,4 +530,59 @@ GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2,
 
 	/* Return the index of the vertex. */
 	return index;
+}
+
+void Mesh::genBufferArrayID()
+{
+	/* Generate the buffer space. */
+	bufferIDs = new GLuint[NUM_BUFFERS];
+	glGenBuffers(NUM_BUFFERS, bufferIDs);
+
+	/* Create vertex buffer. */
+	glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, vertexBufferSize(), vertices,
+		GL_STATIC_DRAW);
+
+	/* Create index buffer. */
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize(), faces, 
+		GL_STATIC_DRAW);
+
+}
+
+void Mesh::genVertexArrayID()
+{
+	/* Generate Vertex Array Object. */
+	glGenVertexArrays(1, &vertexArrayID);
+
+	/* Bind this vertex array ID.*/
+	glBindVertexArray(vertexArrayID);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+		
+	/* Bind the vertex buffer. */
+	glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[0]);
+
+	/* Vertex position attribute. */
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
+	glBindAttribLocation(Geometry::shader->getProgram(), 0, "modelPostion");
+	glBindAttribLocation(Geometry::shader->getProgram(), 1, "modelColor");
+
+	/* Vertex color attribute. */
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
+		(char*)( sizeof(GLfloat) * 3 ));
+		
+	/* Bind the index buffer. */
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[1]);
+
+}
+
+void Mesh::cleanUp()
+{
+	glDeleteBuffers(NUM_BUFFERS, bufferIDs);
+	glDeleteBuffers(1, &vertexArrayID);
+	delete[] vertices;
+	delete[] faces;
+	delete[] bufferIDs;
+	numVertices = numFaces = 0;
 }

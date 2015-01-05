@@ -19,6 +19,7 @@ class Shader
 public:
 	/* Constructor. */
 	Shader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
+	Shader() {}
 	/* Destructor. */
 	~Shader() {}
 	/* use */

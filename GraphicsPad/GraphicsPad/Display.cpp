@@ -38,9 +38,6 @@
 *******************************************************************************/
 Display::Display(std::string title, GLushort width, GLushort height) 
 {
-	/* Get the Screen info. */
-	
-
 
 	/* Create the SDL window. */
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, 
@@ -132,19 +129,14 @@ void Display::updateViewport()
 *  specified color and opacity.                                               *
 *                                                                             *
 *******************************************************************************/
-void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
-                      std::vector<glm::mat4*> modelToWorldMatrices,
-					  GLuint* vertexArrayIDs)
+void Display::repaint(std::vector<Mesh*> meshes,
+                      std::vector<glm::mat4*> modelToWorldMatrices)
 {
 	/* Tell OpenGL to clear the color buffer and depth buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);	
 
 	/* Get the window dimensions and update the viewport. */
 	updateViewport();
-
-	/* Get the location of the fullTransformMatrix uniform variable. */
-	GLint fullTransformMatrixUniformLocation = glGetUniformLocation(programID,
-		"fullTransformMatrix");
 
 	/* Declare the fullTransformMatrix. */
 	glm::mat4 fullTransformMatrix;
@@ -157,11 +149,13 @@ void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
 				camera.getWorldToViewMatrix() *	(*modelToWorldMatrices.at(i));
 
 		/* Bind the appropriate vertex array. */
-		glBindVertexArray(vertexArrayIDs[i]);
+		glBindVertexArray(meshes.at(i)->vertexArrayID);
 
 		/* Send the transformation data down to the buffer. */
-		glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE,
+		glUniformMatrix4fv(fullTransformUniformLocation, 1, GL_FALSE,
 			&fullTransformMatrix[0][0]);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes.at(i)->bufferIDs[1]);
 
 		/* Draw the elements to the window. */
 		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numFaces * 3, 
@@ -171,6 +165,17 @@ void Display::repaint(GLuint programID, std::vector<Mesh*> meshes,
 
 	/* Swap the double buffer. */
 	SDL_GL_SwapWindow(window);
+}
+
+void Display::setShader(Shader shader)
+{
+	/* Tell OpenGL to use this shader. */
+	shader.use();
+
+	/* Get the location of the fullTransformMatrix uniform variable. */
+	fullTransformUniformLocation = glGetUniformLocation(
+		shader.getProgram(), "fullTransformMatrix");
+	
 }
 
 /******************************************************************************

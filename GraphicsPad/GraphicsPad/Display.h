@@ -12,6 +12,7 @@
 #include <vector>
 #include "Camera.h"
 #include "Geometry.h"
+#include "Shader.h"
 
 /* Field of View parameter. */
 #define  FOV   30.0f
@@ -19,6 +20,10 @@
 #define  NEAR   0.1f
 /* Far clipping plane parameter. */
 #define  FAR   50.0f
+
+/* Default vertex and fragment shader source files. */
+#define DEFAULT_VERTEX_SHADER "shader.vs"
+#define DEFAULT_FRAGMENT_SHADER "shader.fs"
 
 /******************************************************************************
  *																			  *
@@ -35,14 +40,14 @@ public:
 	~Display();
 	void updateViewport();
 	/* repaint */
-	void repaint(GLuint programID, std::vector<Mesh*> meshes,
-                 std::vector<glm::mat4*> modelToWorldMatrices,
-				 GLuint* vertexArrayIDs);
+	void repaint(std::vector<Mesh*> meshes,
+                 std::vector<glm::mat4*> modelToWorldMatrices);
 	void setClearColor(GLclampf red, GLclampf blue, GLclampf green, 
 		GLclampf alpha)
 	{
 		glClearColor(red, blue, green, alpha);
 	}
+	void setShader(Shader shader);
 	Camera* getCamera() { return &camera; }
 /* Private Members.*/
 private:
@@ -58,6 +63,8 @@ private:
 	SDL_Surface*	backgroundSurface;
 	/* Camera for looking at the world. */
 	Camera			camera;
+	/* Uniform location for the full transformation. */
+	GLuint			fullTransformUniformLocation;
 	/* View to Projection matrix. */
 	glm::mat4       viewToProjectionMatrix;
 };
