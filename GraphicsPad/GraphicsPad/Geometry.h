@@ -141,7 +141,7 @@ public:
 	static Mesh makeSphere(GLuint tesselation);
 	static Mesh makeIsocohedron();
 	static Mesh makePlane(glm::vec3 x, glm::vec3 y);
-	static Mesh makeCoordinatePlane();
+	static Mesh makeCoordinatePlane(GLint xWidth, GLint yWidth, GLint zWidth);
 	static GLushort getMiddlePoint(GLushort i1, GLushort i2, 
 		std::vector<Vertex> *verts, std::map<GLuint, GLushort>* cache);
 };

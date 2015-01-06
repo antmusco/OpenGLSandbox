@@ -204,8 +204,8 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 
 	/* Calculate number of vertices and indices.  */
-	plane.numVertices = (GLint) NUM_TICKS * NUM_TICKS;
-	plane.numIndices = 6 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
+	plane.numVertices = (GLint) (NUM_TICKS * NUM_TICKS);
+	plane.numIndices = (GLint) (6 * (NUM_TICKS - 1) * (NUM_TICKS - 1));
 
 	/* Allocate heap space. */
 	plane.vertices = new Vertex[plane.numVertices];
@@ -234,14 +234,15 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 		for (GLint j = 0; j < NUM_TICKS - 1; j++)
 		{
 			/* Triangle 1. */
-			plane.indices[index++] = (i * NUM_TICKS) + j; // Top-left
-			plane.indices[index++] = (i * NUM_TICKS) + j + 1; // Top-right
-			plane.indices[index++] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
-			
-			/* Triangle 2. */
-			plane.indices[index++] = (i * NUM_TICKS) + j; // Top-left
-			plane.indices[index++] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
-			plane.indices[index++] = ((i + 1) * NUM_TICKS) + j; // Bottom-left
+			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j ); // Top-left
+			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j ); // Top-left
+			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j + 1 ); // Top-right
+			plane.indices[index++] = (GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 ); // Bottom-right
+									  
+			/* Triangle 2. */		  
+			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j ); // Top-left
+			plane.indices[index++] = (GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 ); // Bottom-right
+			plane.indices[index++] = (GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j ); // Bottom-left
 			
 		}
 	}
@@ -254,23 +255,94 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 	return plane;
 }
 
-Mesh Geometry::makeCoordinatePlane()
+Mesh Geometry::makeCoordinatePlane(GLint xWidth, GLint yWidth, GLint zWidth)
 {
 	/* Define mesh. */
-	Mesh coordPlane;
+	Mesh  coordPlane;
+	GLint xTicks = (xWidth == 0) ? 0 : (xWidth * 2) + 1;
+	GLint yTicks = (yWidth == 0) ? 0 : (yWidth * 2) + 1;
+	GLint zTicks = (zWidth == 0) ? 0 : (zWidth * 2) + 1;
+	GLint numAxes = (xWidth != 0 && yWidth != 0 && zWidth != 0) ? 4 : 2;
+	GLint numVertices = numAxes * ( xTicks + yTicks + zTicks );
+
 	coordPlane.drawMode = GL_LINES;
-	coordPlane.numVertices = 61 * 4;
-	coordPlane.numIndices = 61 * 4;
-	coordPlane.vertices = new Vertex[coordPlane.numVertices];
-	coordPlane.indices = new GLushort[coordPlane.numIndices];
-	for (int i = 0; i < 239;)
+	coordPlane.numVertices = coordPlane.numIndices = numVertices;
+	coordPlane.vertices = new Vertex[numVertices];
+	coordPlane.indices = new GLushort[numVertices];
+
+	glm::vec3 xyColor = { 1.0f, 0.0f, 0.0f };
+	glm::vec3 xzColor = { 0.0f, 1.0f, 0.0f };
+	glm::vec3 yzColor = { 0.0f, 0.0f, 1.0f };
+
+	GLuint index = 0;
+
+	for (GLint i = 0; i < xTicks; i++)
 	{
-		coordPlane.vertices[i++] = { glm::vec3((float)(i - 30), 0.0f, -30.0f), glm::vec3(+1.0f, +1.0f, +1.0f) };
-		coordPlane.vertices[i++] = { glm::vec3((float)(i - 30), 0.0f, +30.0f), glm::vec3(+1.0f, +1.0f, +1.0f) };
-		coordPlane.vertices[i++] = { glm::vec3(-30, 0.0f, (float)(i - 30)), glm::vec3(+1.0f, +1.0f, +1.0f) };
-		coordPlane.vertices[i++] = { glm::vec3(+30, 0.0f, (float)(i - 30)), glm::vec3(+1.0f, +1.0f, +1.0f) };
+		if (yTicks != 0) /* XY Lines */
+		{
+			coordPlane.vertices[index++] = {
+				glm::vec3((float)( i - xWidth ), -((float)yWidth), 0.0f),
+				xyColor };
+			coordPlane.vertices[index++] = {
+				glm::vec3((float)( i - xWidth ), (float)yWidth, 0.0f),
+				xyColor };
+		}
+		if (zTicks != 0) /* XZ Lines */
+		{
+			coordPlane.vertices[index++] = {
+				glm::vec3((float)( i - xWidth ), 0.0f, -((float)zWidth)), 
+				xzColor };
+			coordPlane.vertices[index++] = {
+				glm::vec3((float)( i - xWidth ), 0.0f, (float) zWidth), 
+				xzColor };
+		}
 	}
-	for (int i = 0; i < coordPlane.numIndices; i++)
+
+	for (GLint i = 0; i < yTicks; i++)
+	{
+		if (xTicks != 0) /* YX Lines */
+		{
+			coordPlane.vertices[index++] = {
+				glm::vec3((float)xWidth, (float)( i - yWidth ), 0.0f),
+				xyColor };
+			coordPlane.vertices[index++] = {
+				glm::vec3(-( (float)xWidth ), (float)( i - yWidth ), 0.0f),
+				xyColor };
+		}
+		if (zTicks != 0) /* YZ Lines */
+		{
+			coordPlane.vertices[index++] = {
+				glm::vec3( 0.0f, (float)( i - yWidth ), -((float)zWidth)),
+				yzColor };
+			coordPlane.vertices[index++] = {
+				glm::vec3(0.0f, (float)( i - yWidth ), (float)zWidth),
+				yzColor };
+		}
+	}
+
+	for (GLint i = 0; i < zTicks; i++)
+	{ 
+		if (xTicks != 0) /* ZX Lines */
+		{
+			coordPlane.vertices[index++] = {
+				glm::vec3((float)xWidth, 0.0f, (float)( i - zWidth )),
+				xzColor };
+			coordPlane.vertices[index++] = {
+				glm::vec3(-( (float)xWidth ), 0.0f, (float)( i - zWidth )),
+				xzColor };
+		}
+		if (yTicks != 0) /* ZY Lines */
+		{
+			coordPlane.vertices[index++] = {
+				glm::vec3(0.0f, (float)yWidth, (float)( i - zWidth )),
+				yzColor };
+			coordPlane.vertices[index++] = {
+				glm::vec3(0.0f, -( (float)yWidth ), (float)( i - zWidth )),
+				yzColor };
+		}
+	}
+
+	for (GLuint i = 0; i < coordPlane.numIndices; i++)
 		coordPlane.indices[i] = i;
 
 	coordPlane.genBufferArrayID();
@@ -418,28 +490,28 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 
 	/* Get the vertices from icosohedron. */
 	std::vector<Vertex> localVerts;
-	for (int i = 0; i < ico.numVertices; i++)
+	for (GLuint i = 0; i < ico.numVertices; i++)
 		localVerts.push_back(ico.vertices[i]);
 
 	/* Get the indices from the icosohedron. */
 	std::vector<GLushort> localIndices;
-	for (int i = 0; i < ico.numIndices; i++)
+	for (GLuint i = 0; i < ico.numIndices; i++)
 		localIndices.push_back(ico.indices[i]);
 
 	/* Normalize the position of the vertices. */
-	for (int i = 0; i < localVerts.size(); i++)
+	for (GLuint i = 0; i < localVerts.size(); i++)
 		localVerts.at(i).position /= glm::length(localVerts.at(i).position);
 
 	/* Temp variables for looping. */
 	GLushort a, b, c;
 
 	/* Tesselate and normalize. */
-	for (int i = 0; i < tesselation; i++)
+	for (GLuint i = 0; i < tesselation; i++)
 	{
 		std::vector<GLushort> newIndices;
 
 		/* Split each triangle into 4 new triangles. */
-		for (int i = 0; i < localIndices.size(); i += 3)
+		for (GLuint i = 0; i < localIndices.size(); i += 3)
 		{
 			/* Get the middle points of each side of the triangle. */
 			a = getMiddlePoint(localIndices.at(i + 0), localIndices.at(i + 1), 
