@@ -79,9 +79,9 @@ int main(int argc, char* argv[])
 	Geometry::shader = &shader;
 
 	/* Create the geometries. */
-	Mesh shape1 = Geometry::makeSphere(2);
+	Mesh shape1 = Geometry::makeSphere(3);
 	Mesh shape2 = Geometry::makeCube();
-	Mesh shape3 = Geometry::makeCoordinatePlane(10, 20, 30);
+	Mesh shape3 = Geometry::makeCoordinatePlane(30, 30, 30);
 	Mesh shape4 = Geometry::makeIsocohedron();
 	//Mesh shape5 = Geometry::makePlane({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
 
@@ -120,8 +120,8 @@ int main(int argc, char* argv[])
 	int i = 1;
 	for (Mesh* m : meshes)
 		std::cout << "Shape " << i++ 
-			<< ": vaoID = " << m->vertexArrayID 
-			<< " | buffIDs = " << m->bufferIDs[0] << " " << m->bufferIDs[1]
+			<< ": vaoID = " << m->getVertexArrayID() 
+			<< " | buffIDs = " << m->getBufferIDs()[0] << " " << m->getBufferIDs()[1]
 			<< std::endl;
 
 	/* Main loop. */	

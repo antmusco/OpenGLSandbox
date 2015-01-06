@@ -138,28 +138,27 @@ void Display::repaint(std::vector<Mesh*> meshes,
 	/* Get the window dimensions and update the viewport. */
 	updateViewport();
 
-	/* Declare the fullTransformMatrix. */
-	glm::mat4 fullTransformMatrix;
-
 	/* Display Meshes. */
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
-		/* Generate the full transformation. */
-		fullTransformMatrix = viewToProjectionMatrix *
-				camera.getWorldToViewMatrix() *	(*modelToWorldMatrices.at(i));
+		/* Generate the Model -> Proj. transformation. */
+		modelToProjection = viewToProjectionMatrix *        // View  -> Proj.
+                            camera.getWorldToViewMatrix() *	// World -> View 
+                            (*modelToWorldMatrices.at(i));  // Model -> World
 
 		/* Bind the appropriate vertex array. */
-		glBindVertexArray(meshes.at(i)->vertexArrayID);
+		glBindVertexArray(meshes.at(i)->getVertexArrayID());
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes.at(i)->getBufferIDs()[1]);
 
 		/* Send the transformation data down to the buffer. */
-		glUniformMatrix4fv(fullTransformUniformLocation, 1, GL_FALSE,
-			&fullTransformMatrix[0][0]);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes.at(i)->bufferIDs[1]);
+		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
+			&modelToProjection[0][0]);
 
 		/* Draw the elements to the window. */
-		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numIndices * 3, 
-			GL_UNSIGNED_SHORT, 0);
+		glDrawElements(meshes.at(i)->getDrawMode(),      // Draw mode.
+                       meshes.at(i)->getNumIndices(),    // Number of indices
+					   GL_UNSIGNED_SHORT,                // Data type of index
+                       0);                               // Index offset
 
 	}
 
@@ -173,8 +172,8 @@ void Display::setShader(Shader shader)
 	shader.use();
 
 	/* Get the location of the fullTransformMatrix uniform variable. */
-	fullTransformUniformLocation = glGetUniformLocation(
-		shader.getProgram(), "fullTransformMatrix");
+	modelToProjectionUniformLocation = glGetUniformLocation(
+		shader.getProgram(), "modelToProjectionMatrix");
 	
 }
 

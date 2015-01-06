@@ -64,7 +64,9 @@ private:
 	/* Camera for looking at the world. */
 	Camera			camera;
 	/* Uniform location for the full transformation. */
-	GLuint			fullTransformUniformLocation;
+	GLuint			modelToProjectionUniformLocation;
+	glm::mat4		modelToProjection;
 	/* View to Projection matrix. */
 	glm::mat4       viewToProjectionMatrix;
+
 };

@@ -7,9 +7,171 @@
 #include <GL\glew.h>
 #include <glm\glm.hpp>
 
+/******************************************************************************
+*                                                                             *
+*                                      Macros                                 *
+*                                                                             *
+******************************************************************************/
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(*a)
 
 Shader* Geometry::shader = NULL;
+
+/******************************************************************************
+*                                                                             *
+*                             Mesh::Mesh() (constructor)                      *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Default constructor which initializes all members of Mesh to 0 (NULL)      *
+*  except for members with default values (numBuffers and drawMode).          *
+*                                                                             *
+*******************************************************************************/
+Mesh::Mesh() :
+      vertices(0), numVertices(0),
+      indices(0), numIndices(0),
+      textureID(0),
+      numBuffers(DEFAULT_NUM_BUFFERS), bufferIDs(0), vertexArrayID(0),
+      drawMode(DEFAULT_DRAW_MODE) {}
+
+/******************************************************************************
+*                                                                             *
+*                          Mesh::vertexBufferSize()  (const)                  *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  The number of bytes required for this Mesh's vertex buffer.                *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Calculates the number of bytes required for this Mesh's vertex buffer.     *
+*                                                                             *
+*******************************************************************************/
+GLsizeiptr Mesh::vertexBufferSize() const
+{
+	return numVertices * sizeof(Vertex);
+}
+
+/******************************************************************************
+*                                                                             *
+*                          Mesh::indexBufferSize()  (const)                   *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  The number of bytes required for this Mesh's index buffer.                 *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Calculates the number of bytes required for this Mesh's index buffer.      *
+*                                                                             *
+*******************************************************************************/
+GLsizeiptr Mesh::indexBufferSize() const
+{
+	return numIndices * sizeof(GLuint);
+}
+
+/******************************************************************************
+*                                                                             *
+*                         Mesh::setVertices()  (overloaded)                   *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS (1)                                                              *
+*  n                                                                          *
+*           The number of elements in the array to copy.                      *
+*  a                                                                          *
+*           A pointer to the array of values to be set as the vertices.       *
+*                                                                             *
+* PARAMETERS (2)                                                              *
+*  v                                                                          *
+*           A pointer to a vector containing the values to be set as the      *
+*           vertices.                                                         *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Sets the number of vertices, as well as their values, for this Mesh.       *
+*                                                                             *
+*******************************************************************************/
+void Mesh::setVertices(GLuint n, Vertex* a)
+{
+	/* Set number of vertices. */
+	numVertices = n;
+	/* Allocate space on the heap. */
+	vertices = new Vertex[n];
+	/* Copy the data over to the allocated space. */
+	memcpy(vertices, a, sizeof(Vertex) * n);
+}
+void Mesh::setVertices(std::vector<Vertex>* v)
+{
+	/* Set number of vertices. */
+	numVertices = v->size();
+	/* Allocate space on the heap. */
+	vertices = new Vertex[v->size()];
+	/* Copy the data over to the allocated space. */
+	memcpy(vertices, v->data(), sizeof(Vertex) * v->size());
+}
+
+/******************************************************************************
+*                                                                             *
+*                         Mesh::setIndices()   (overloaded)                   *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS (1)                                                              *
+*  n                                                                          *
+*           The number of elements in the array to copy.                      *
+*  a                                                                          *
+*           A pointer to the array of values to be set as the indices.        *
+*                                                                             *
+* PARAMETERS (2)                                                              *
+*  v                                                                          *
+*           A pointer to a vector containing the values to be set as the      *
+*           indices.                                                          *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Sets the number of indices, as well as their values, for this Mesh.        *
+*                                                                             *
+*******************************************************************************/
+void Mesh::setIndices(GLuint n, GLushort* a)
+{
+	/* Set number of indices. */
+	numIndices = n;
+	/* Allocate space on the heap. */
+	indices = new GLushort[n];
+	/* Copy the data over to the allocated space. */
+	std::copy(a, a + n, indices);
+}
+void Mesh::setIndices(std::vector<GLushort>* i)
+{
+	/* Set number of vertices. */
+	numIndices = i->size();
+	/* Allocate space on the heap. */
+	indices = new GLushort[i->size()];
+	/* Copy the data over to the allocated space. */
+	memcpy(indices, i->data(), sizeof(GLushort) * i->size());
+}
 
 /******************************************************************************
 *                                                                             *
@@ -35,27 +197,22 @@ Mesh Geometry::makeTriangle()
 	/* Define return mesh. */
 	Mesh triangle;
 
-	triangle.drawMode = GL_TRIANGLES;
-
 	/* Deine vertices. */
-	Vertex localVerts[] =
+	Vertex localVertices[] =
 	{
-		glm::vec3(+0.0f, +1.0f, +0.0f),// 0
-		glm::vec3(+1.0f, +0.0f, +0.0f),
+		/* Vertex 0. */
+		glm::vec3(+0.0f, +1.0f, +0.0f), // Position.
+		glm::vec3(+1.0f, +0.0f, +0.0f), // Color.
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
 
-		glm::vec3(-1.0f, -1.0f, +0.0f),// 1
-		glm::vec3(+0.0f, +1.0f, +0.0f),
+		glm::vec3(-1.0f, -1.0f, +0.0f), // Position.
+		glm::vec3(+0.0f, +1.0f, +0.0f), // Color.
+		glm::vec2(+0.0f, +0.0f), // Texture Coordinate.
 
-		glm::vec3(+1.0f, -1.0f, +0.0f),// 2
-		glm::vec3(+0.0f, +0.0f, +1.0f),
+		glm::vec3(+1.0f, -1.0f, +0.0f), // Position.
+		glm::vec3(+0.0f, +0.0f, +1.0f), // Color.
+		glm::vec2(+0.0f, +0.0f), // Texture Coordinate.
 	};
-
-	/* Record the number of vertices. */
-	triangle.numVertices = ARRAY_SIZE(localVerts);
-	
-	/* Allocate memory on the heap and copy data from stack. */
-	triangle.vertices = new Vertex[triangle.numVertices];
-	memcpy(triangle.vertices, localVerts, sizeof(localVerts));
 
 	/* Define indices. */
 	GLushort localIndices[] =
@@ -63,12 +220,9 @@ Mesh Geometry::makeTriangle()
 		0, 1, 2
 	};
 
-	/* Record the number of indices. */
-	triangle.numIndices = ARRAY_SIZE(localIndices);
-
-	/* Allocate memory on the heap and copy data from stack. */
-	triangle.indices = new GLushort[triangle.numIndices];
-	memcpy(triangle.indices, localIndices, sizeof(localIndices));
+	/* Set the vertices and the indices for this triangle. */
+	triangle.setVertices(ARRAY_SIZE(localVertices), localVertices);
+	triangle.setIndices(ARRAY_SIZE(localIndices), localIndices);
 
 	/* Generate buffer and vertex arrays. */
 	triangle.genBufferArrayID();
@@ -102,72 +256,106 @@ Mesh Geometry::makeCube()
 	/* Define return mesh. */
 	Mesh cube;
 
-	cube.drawMode = GL_TRIANGLES;
-
 	/* Deine vertices. */
-	Vertex localVerts[] =
+	Vertex localVertices[] =
 	{
-		glm::vec3(-1.0f, +1.0f, +1.0f), // 0
-		glm::vec3(+1.0f, +0.0f, +0.0f), // Colour
-		glm::vec3(+1.0f, +1.0f, +1.0f), // 1
-		glm::vec3(+0.0f, +1.0f, +0.0f), // Colour
-		glm::vec3(+1.0f, +1.0f, -1.0f), // 2
-		glm::vec3(+0.0f, +0.0f, +1.0f), // Colour
-		glm::vec3(-1.0f, +1.0f, -1.0f), // 3
-		glm::vec3(+1.0f, +1.0f, +1.0f), // Colour
-
-		glm::vec3(-1.0f, +1.0f, -1.0f), // 4
-		glm::vec3(+1.0f, +0.0f, +1.0f), // Colour
-		glm::vec3(+1.0f, +1.0f, -1.0f), // 5
-		glm::vec3(+0.0f, +0.5f, +0.2f), // Colour
-		glm::vec3(+1.0f, -1.0f, -1.0f), // 6
-		glm::vec3(+0.8f, +0.6f, +0.4f), // Colour
-		glm::vec3(-1.0f, -1.0f, -1.0f), // 7
-		glm::vec3(+0.3f, +1.0f, +0.5f), // Colour
-
-		glm::vec3(+1.0f, +1.0f, -1.0f), // 8
-		glm::vec3(+0.2f, +0.5f, +0.2f), // Colour
-		glm::vec3(+1.0f, +1.0f, +1.0f), // 9
-		glm::vec3(+0.9f, +0.3f, +0.7f), // Colour
-		glm::vec3(+1.0f, -1.0f, +1.0f), // 10
-		glm::vec3(+0.3f, +0.7f, +0.5f), // Colour
-		glm::vec3(+1.0f, -1.0f, -1.0f), // 11
-		glm::vec3(+0.5f, +0.7f, +0.5f), // Colour
-
-		glm::vec3(-1.0f, +1.0f, +1.0f), // 12
-		glm::vec3(+0.7f, +0.8f, +0.2f), // Colour
-		glm::vec3(-1.0f, +1.0f, -1.0f), // 13
-		glm::vec3(+0.5f, +0.7f, +0.3f), // Colour
-		glm::vec3(-1.0f, -1.0f, -1.0f), // 14
-		glm::vec3(+0.4f, +0.7f, +0.7f), // Colour
-		glm::vec3(-1.0f, -1.0f, -1.0f), // 15
-		glm::vec3(+0.2f, +0.5f, +1.0f), // Colour
-
-		glm::vec3(+1.0f, +1.0f, +1.0f), // 16
-		glm::vec3(+0.6f, +1.0f, +0.7f), // Colour
-		glm::vec3(-1.0f, +1.0f, +1.0f), // 17
-		glm::vec3(+0.6f, +0.4f, +0.8f), // Colour
-		glm::vec3(-1.0f, -1.0f, +1.0f), // 18
-		glm::vec3(+0.2f, +0.8f, +0.7f), // Colour
-		glm::vec3(+1.0f, -1.0f, +1.0f), // 19
-		glm::vec3(+0.2f, +0.7f, +1.0f), // Colour
-
-		glm::vec3(+1.0f, -1.0f, -1.0f), // 20
-		glm::vec3(+0.8f, +0.3f, +0.7f), // Colour
-		glm::vec3(-1.0f, -1.0f, -1.0f), // 21
-		glm::vec3(+0.8f, +0.9f, +0.5f), // Colour
-		glm::vec3(-1.0f, -1.0f, +1.0f), // 22
-		glm::vec3(+0.5f, +0.8f, +0.5f), // Colour
-		glm::vec3(+1.0f, -1.0f, +1.0f), // 23
-		glm::vec3(+0.9f, +1.0f, +0.2f), // Colour
+		/* Vertex 0. */
+		glm::vec3(-1.0f, +1.0f, +1.0f), // Position.
+		glm::vec3(+1.0f, +0.0f, +0.0f), // Color.
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 1. */
+		glm::vec3(+1.0f, +1.0f, +1.0f), // Position.
+		glm::vec3(+0.0f, +1.0f, +0.0f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 2. */
+		glm::vec3(+1.0f, +1.0f, -1.0f), // Position.
+		glm::vec3(+0.0f, +0.0f, +1.0f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 3. */
+		glm::vec3(-1.0f, +1.0f, -1.0f), // Position.
+		glm::vec3(+1.0f, +1.0f, +1.0f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 4. */
+		glm::vec3(-1.0f, +1.0f, -1.0f), // Position.
+		glm::vec3(+1.0f, +0.0f, +1.0f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 5. */
+		glm::vec3(+1.0f, +1.0f, -1.0f), // Position.
+		glm::vec3(+0.0f, +0.5f, +0.2f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 6. */
+		glm::vec3(+1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.8f, +0.6f, +0.4f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 7. */
+		glm::vec3(-1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.3f, +1.0f, +0.5f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 8. */
+		glm::vec3(+1.0f, +1.0f, -1.0f), // Position.
+		glm::vec3(+0.2f, +0.5f, +0.2f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 9. */
+		glm::vec3(+1.0f, +1.0f, +1.0f), // Position.
+		glm::vec3(+0.9f, +0.3f, +0.7f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 10. */
+		glm::vec3(+1.0f, -1.0f, +1.0f), // Position.
+		glm::vec3(+0.3f, +0.7f, +0.5f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 11. */
+		glm::vec3(+1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.5f, +0.7f, +0.5f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 12. */
+		glm::vec3(-1.0f, +1.0f, +1.0f), // Position.
+		glm::vec3(+0.7f, +0.8f, +0.2f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 13. */
+		glm::vec3(-1.0f, +1.0f, -1.0f), // Position.
+		glm::vec3(+0.5f, +0.7f, +0.3f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 14. */
+		glm::vec3(-1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.4f, +0.7f, +0.7f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 15. */
+		glm::vec3(-1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.2f, +0.5f, +1.0f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 16. */
+		glm::vec3(+1.0f, +1.0f, +1.0f), // Position.
+		glm::vec3(+0.6f, +1.0f, +0.7f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 17. */
+		glm::vec3(-1.0f, +1.0f, +1.0f), // Position.
+		glm::vec3(+0.6f, +0.4f, +0.8f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 18. */
+		glm::vec3(-1.0f, -1.0f, +1.0f), // Position.
+		glm::vec3(+0.2f, +0.8f, +0.7f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 19. */
+		glm::vec3(+1.0f, -1.0f, +1.0f), // Position.
+		glm::vec3(+0.2f, +0.7f, +1.0f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 21. */
+		glm::vec3(+1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.8f, +0.3f, +0.7f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 22. */
+		glm::vec3(-1.0f, -1.0f, -1.0f), // Position.
+		glm::vec3(+0.8f, +0.9f, +0.5f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 23. */
+		glm::vec3(-1.0f, -1.0f, +1.0f), // Position.
+		glm::vec3(+0.5f, +0.8f, +0.5f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
+		/* Vertex 24. */
+		glm::vec3(+1.0f, -1.0f, +1.0f), // Position.
+		glm::vec3(+0.9f, +1.0f, +0.2f), // Color
+		glm::vec2(+0.0f, +0.0f),        // Texture Coordinate.
 	};
-
-	/* Record the number of vertices. */
-	cube.numVertices = ARRAY_SIZE(localVerts);
-
-	/* Allocate memory on the heap and copy data from stack. */
-	cube.vertices = new Vertex[cube.numVertices];
-	memcpy(cube.vertices, localVerts, sizeof(localVerts));
 
 	/* Define indices. */
 	GLushort localIndices[] = {
@@ -179,13 +367,10 @@ Mesh Geometry::makeCube()
 		 20, 22, 21, 20, 23, 22, // Bottom
 	};
 
-	/* Record the number of indices. */
-	cube.numIndices = ARRAY_SIZE(localIndices);
-
-	/* Allocate memory on the heap and copy data from stack. */
-	cube.indices = new GLushort[cube.numIndices];
-	memcpy(cube.indices, localIndices, sizeof(localIndices));
-
+	/* Set the vertices and the indices for the mesh.. */
+	cube.setVertices(ARRAY_SIZE(localVertices), localVertices);
+	cube.setIndices(ARRAY_SIZE(localIndices), localIndices);
+	
 	/* Generate buffer and vertex arrays. */
 	cube.genBufferArrayID();
 	cube.genVertexArrayID();
@@ -199,53 +384,50 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 	/* Decleare return mesh and color of indices. */
 	Mesh plane;
 
-	plane.drawMode = GL_TRIANGLES;
-
+	const GLint NUM_TICKS = 10;
+	GLfloat lowBound = (NUM_TICKS - 1.0f) / 2; 
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+	glm::vec2 texture  = { 0.0f, 0.0f };
 
-	/* Calculate number of vertices and indices.  */
-	plane.numVertices = (GLint) (NUM_TICKS * NUM_TICKS);
-	plane.numIndices = (GLint) (6 * (NUM_TICKS - 1) * (NUM_TICKS - 1));
-
-	/* Allocate heap space. */
-	plane.vertices = new Vertex[plane.numVertices];
-	plane.indices = new GLushort[plane.numIndices];
-
-	GLushort index = 0;
+	/* Create vectors to store the vertices and the indices.  */
+	std::vector<Vertex> localVertices;
+	std::vector<GLushort> localIndices;
 
 	/* Define vertices. */
 	for (GLint i = 0; i < NUM_TICKS; i++)
 	{
 		for (GLint j = 0; j < NUM_TICKS; j++)
 		{
-			index = (GLushort)( i * NUM_TICKS ) + j;
-			plane.vertices[index] =
-			{
-				( ( i - ( ( NUM_TICKS - 1 ) / 2 ) ) * x ) + ( ( j - ( ( NUM_TICKS - 1 ) / 2 ) ) * y ),
-				color
+			Vertex v = {
+				( i - lowBound ) * x + ( j - lowBound ) * y,
+				color,
+				texture
 			};
+			localVertices.push_back(v);
 		}
 	}
 	
 	/* Define indices. */
-	index = 0;
 	for (GLint i = 0; i < NUM_TICKS - 1; i++)
 	{
 		for (GLint j = 0; j < NUM_TICKS - 1; j++)
 		{
 			/* Triangle 1. */
-			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j ); // Top-left
-			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j ); // Top-left
-			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j + 1 ); // Top-right
-			plane.indices[index++] = (GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 ); // Bottom-right
+			localIndices.push_back((GLushort)( ( i * NUM_TICKS ) + j )); // Top-left
+			localIndices.push_back((GLushort)( ( i * NUM_TICKS ) + j + 1 )); // Top-right
+			localIndices.push_back((GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 )); // Bottom-right
 									  
 			/* Triangle 2. */		  
-			plane.indices[index++] = (GLushort)( ( i * NUM_TICKS ) + j ); // Top-left
-			plane.indices[index++] = (GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 ); // Bottom-right
-			plane.indices[index++] = (GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j ); // Bottom-left
-			
+			localIndices.push_back((GLushort)( ( i * NUM_TICKS ) + j )); // Top-left
+			localIndices.push_back((GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 )); // Bottom-right
+			localIndices.push_back((GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j )); // Bottom-left
+
 		}
 	}
+
+	/* Set the vertices and the indices for the mesh.. */
+	plane.setVertices(&localVertices);
+	plane.setIndices(&localIndices);
 
 	/* Generate buffer and vertex arrays. */
 	plane.genBufferArrayID();
@@ -265,36 +447,44 @@ Mesh Geometry::makeCoordinatePlane(GLint xWidth, GLint yWidth, GLint zWidth)
 	GLint numAxes = (xWidth != 0 && yWidth != 0 && zWidth != 0) ? 4 : 2;
 	GLint numVertices = numAxes * ( xTicks + yTicks + zTicks );
 
-	coordPlane.drawMode = GL_LINES;
-	coordPlane.numVertices = coordPlane.numIndices = numVertices;
-	coordPlane.vertices = new Vertex[numVertices];
-	coordPlane.indices = new GLushort[numVertices];
+	/* Set the custom draw mode. */
+	coordPlane.setDrawMode(GL_LINES);
+
+	std::vector<Vertex> localVertices;
+	std::vector<GLushort> localIndices;
 
 	glm::vec3 xyColor = { 1.0f, 0.0f, 0.0f };
 	glm::vec3 xzColor = { 0.0f, 1.0f, 0.0f };
 	glm::vec3 yzColor = { 0.0f, 0.0f, 1.0f };
-
-	GLuint index = 0;
+	glm::vec2 texture = { 0.0f, 0.0f };
 
 	for (GLint i = 0; i < xTicks; i++)
 	{
 		if (yTicks != 0) /* XY Lines */
 		{
-			coordPlane.vertices[index++] = {
+			localVertices.push_back({
 				glm::vec3((float)( i - xWidth ), -((float)yWidth), 0.0f),
-				xyColor };
-			coordPlane.vertices[index++] = {
+				xyColor,
+			    texture
+			});
+			localVertices.push_back({
 				glm::vec3((float)( i - xWidth ), (float)yWidth, 0.0f),
-				xyColor };
+				xyColor,
+			    texture
+			});
 		}
 		if (zTicks != 0) /* XZ Lines */
 		{
-			coordPlane.vertices[index++] = {
+			localVertices.push_back({
 				glm::vec3((float)( i - xWidth ), 0.0f, -((float)zWidth)), 
-				xzColor };
-			coordPlane.vertices[index++] = {
+				xzColor,
+			    texture
+			});
+			localVertices.push_back({
 				glm::vec3((float)( i - xWidth ), 0.0f, (float) zWidth), 
-				xzColor };
+				xzColor,
+			    texture
+			});
 		}
 	}
 
@@ -302,21 +492,29 @@ Mesh Geometry::makeCoordinatePlane(GLint xWidth, GLint yWidth, GLint zWidth)
 	{
 		if (xTicks != 0) /* YX Lines */
 		{
-			coordPlane.vertices[index++] = {
+			localVertices.push_back({
 				glm::vec3((float)xWidth, (float)( i - yWidth ), 0.0f),
-				xyColor };
-			coordPlane.vertices[index++] = {
+				xyColor,
+			    texture
+			});
+			localVertices.push_back({
 				glm::vec3(-( (float)xWidth ), (float)( i - yWidth ), 0.0f),
-				xyColor };
+				xyColor,
+			    texture
+			});
 		}
 		if (zTicks != 0) /* YZ Lines */
 		{
-			coordPlane.vertices[index++] = {
+			localVertices.push_back({
 				glm::vec3( 0.0f, (float)( i - yWidth ), -((float)zWidth)),
-				yzColor };
-			coordPlane.vertices[index++] = {
+				yzColor,
+			    texture
+			});
+			localVertices.push_back({
 				glm::vec3(0.0f, (float)( i - yWidth ), (float)zWidth),
-				yzColor };
+				yzColor,
+			    texture
+			});
 		}
 	}
 
@@ -324,27 +522,41 @@ Mesh Geometry::makeCoordinatePlane(GLint xWidth, GLint yWidth, GLint zWidth)
 	{ 
 		if (xTicks != 0) /* ZX Lines */
 		{
-			coordPlane.vertices[index++] = {
+			localVertices.push_back({
 				glm::vec3((float)xWidth, 0.0f, (float)( i - zWidth )),
-				xzColor };
-			coordPlane.vertices[index++] = {
+				xzColor,
+			    texture
+			});
+			localVertices.push_back({
 				glm::vec3(-( (float)xWidth ), 0.0f, (float)( i - zWidth )),
-				xzColor };
+				xzColor,
+			    texture
+			});
 		}
 		if (yTicks != 0) /* ZY Lines */
 		{
-			coordPlane.vertices[index++] = {
+			localVertices.push_back({
 				glm::vec3(0.0f, (float)yWidth, (float)( i - zWidth )),
-				yzColor };
-			coordPlane.vertices[index++] = {
+				yzColor,
+			    texture
+			});
+			localVertices.push_back({
 				glm::vec3(0.0f, -( (float)yWidth ), (float)( i - zWidth )),
-				yzColor };
+				yzColor,
+			    texture
+			});
 		}
 	}
 
-	for (GLuint i = 0; i < coordPlane.numIndices; i++)
-		coordPlane.indices[i] = i;
+	/* Define the indices locally. */
+	for (GLushort i = 0; i < localVertices.size(); i++)
+		localIndices.push_back(i);
 
+	/* Set the vertice and the indices for this mesh. */
+	coordPlane.setVertices(&localVertices);
+	coordPlane.setIndices(&localIndices);
+
+	/* Generate buffer and vertex arrays. */
 	coordPlane.genBufferArrayID();
 	coordPlane.genVertexArrayID();
 
@@ -356,49 +568,60 @@ Mesh Geometry::makeIsocohedron()
 	/* Define return mesh. */
 	Mesh ico;
 
-	ico.drawMode = GL_TRIANGLES;
-
 	/* Constant offset. */
 	GLfloat t = (GLfloat)( 1.0 + std::sqrtf(5.0) ) / 2;
+	glm::vec2 texture = { 0.0f, 0.0f };
 
 	/* Define the vertices locally. */
-	Vertex localVerts[] = {
+	Vertex localVertices[] = {
 
 		glm::vec3(-1.0, +t, +0.0), // 0 - Top
 		glm::vec3(+1.0, +t, +0.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate     
 
 		glm::vec3(+1.0, +t, +0.0), // 1
 		glm::vec3(+1.0, +t, +0.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(-1.0, -t, +0.0), // 2
 		glm::vec3(+0.0, +t, +0.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+1.0, -t, +0.0), // 3
 		glm::vec3(+1.0, +t, +0.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+0.0, -1.0, +t), // 4
 		glm::vec3(+0.0, +1.0, +t), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+0.0, +1.0, +t), // 5
 		glm::vec3(+0.0, +1.0, +t), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+0.0, -1.0, -t), // 6
 		glm::vec3(+0.0, +1.0, +t), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+0.0, +1.0, -t), // 7
 		glm::vec3(+0.0, +1.0, +t), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+t, +0.0, -1.0), // 8
 		glm::vec3(+t, +0.0, -1.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(+t, +0.0, +1.0), // 9
 		glm::vec3(+t, +0.0, +1.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(-t, +0.0, -1.0), // 10
 		glm::vec3(+t, +0.0, +1.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 		glm::vec3(-t, +0.0, +1.0), // 11
 		glm::vec3(+t, +0.0, +1.0), // Color
+		glm::vec2(+0.0f, 0.0f),    // Texture Coordinate 
 
 	};
 
@@ -431,19 +654,9 @@ Mesh Geometry::makeIsocohedron()
 		 9,  8,  1,
 	};
 
-	/* Record the number of vertices. */
-	ico.numVertices = ARRAY_SIZE(localVerts);
-
-	/* Allocate memory on the heap and copy data from stack. */
-	ico.vertices = new Vertex[ico.numVertices];
-	memcpy(ico.vertices, localVerts, sizeof(localVerts));
-
-	/* Record the number of indices. */
-	ico.numIndices = ARRAY_SIZE(localIndices);
-
-	/* Allocate memory on the heap and copy data from stack. */
-	ico.indices = new GLushort[ico.numIndices];
-	memcpy(ico.indices, localIndices, sizeof(localIndices));
+	/* Set the vertices and indices of this mesh. */
+	ico.setVertices(ARRAY_SIZE(localVertices), localVertices);
+	ico.setIndices(ARRAY_SIZE(localIndices), localIndices);
 
 	/* Generate buffer and vertex arrays. */
 	ico.genBufferArrayID();
@@ -479,47 +692,41 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	Mesh ico = Geometry::makeIsocohedron();
 	std::map<GLuint, GLushort> middlePointIndexCache;
 
-	/* Define the draw mode for the geometry. */
-	sphere.drawMode = GL_TRIANGLES;
-
 	/* Constant offset. */
 	GLfloat t = (GLfloat)( 1.0 + std::sqrtf(5.0) ) / 2;
 
-	sphere.numIndices = ico.numIndices;
-	sphere.numVertices = ico.numVertices;
-
 	/* Get the vertices from icosohedron. */
-	std::vector<Vertex> localVerts;
-	for (GLuint i = 0; i < ico.numVertices; i++)
-		localVerts.push_back(ico.vertices[i]);
+	std::vector<Vertex> localVertices;
+	for (GLuint i = 0; i < ico.getNumVertices(); i++)
+		localVertices.push_back(ico.getVertex(i));
 
 	/* Get the indices from the icosohedron. */
 	std::vector<GLushort> localIndices;
-	for (GLuint i = 0; i < ico.numIndices; i++)
-		localIndices.push_back(ico.indices[i]);
+	for (GLuint i = 0; i < ico.getNumIndices(); i++)
+		localIndices.push_back(ico.getIndex(i));
 
 	/* Normalize the position of the vertices. */
-	for (GLuint i = 0; i < localVerts.size(); i++)
-		localVerts.at(i).position /= glm::length(localVerts.at(i).position);
+	for (GLuint i = 0; i < localVertices.size(); i++)
+		localVertices.at(i).position /= glm::length(localVertices.at(i).position);
 
 	/* Temp variables for looping. */
 	GLushort a, b, c;
 
 	/* Tesselate and normalize. */
-	for (GLuint i = 0; i < tesselation; i++)
+	for (GLuint j = 0; j < tesselation; j++)
 	{
 		std::vector<GLushort> newIndices;
 
 		/* Split each triangle into 4 new triangles. */
-		for (GLuint i = 0; i < localIndices.size(); i += 3)
+		for (GLuint i = 0; i < localIndices.size() - 2; i += 3)
 		{
 			/* Get the middle points of each side of the triangle. */
 			a = getMiddlePoint(localIndices.at(i + 0), localIndices.at(i + 1), 
-					&localVerts, &middlePointIndexCache);
+					&localVertices, &middlePointIndexCache);
 			b = getMiddlePoint(localIndices.at(i + 1), localIndices.at(i + 2),
-					&localVerts, &middlePointIndexCache);
+					&localVertices, &middlePointIndexCache);
 			c = getMiddlePoint(localIndices.at(i + 2), localIndices.at(i + 0),
-					&localVerts, &middlePointIndexCache);
+					&localVertices, &middlePointIndexCache);
 
 			/* Add 4 new triangles in place of 'tri' in the new vector. */
 
@@ -546,15 +753,9 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 		localIndices = newIndices;
 	}
 
-	/* Copy over the local vertex data. */
-	sphere.numVertices = localVerts.size();
-	sphere.vertices = new Vertex[sphere.numVertices];
-	memcpy(sphere.vertices, localVerts.data(), localVerts.size() * sizeof(Vertex));
-
-	/* Copy over the local face data. */
-	sphere.numIndices = localIndices.size();
-	sphere.indices = new GLushort[sphere.numIndices];
-	memcpy(sphere.indices, localIndices.data(), localIndices.size() * sizeof(GLushort));
+	/* Set the vertices and indices of this mesh. */
+	sphere.setVertices(&localVertices);
+	sphere.setIndices(&localIndices);
 	
 	/* Generate buffer and vertex arrays. */
 	sphere.genBufferArrayID();
@@ -622,11 +823,30 @@ GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2,
 	return index;
 }
 
+/******************************************************************************
+*                                                                             *
+*                          Mesh::genBufferArrayID()                           *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Generates the graphics hardware buffers for data regarding this Mesh. The  *
+*  two specific buffers for this class are the vertex buffer and the index    *
+*  buffer. The IDs of these buffers are stored in the bufferIDs array.        *
+*                                                                             *
+*******************************************************************************/
 void Mesh::genBufferArrayID()
 {
 	/* Generate the buffer space. */
-	bufferIDs = new GLuint[NUM_BUFFERS];
-	glGenBuffers(NUM_BUFFERS, bufferIDs);
+	bufferIDs = new GLuint[numBuffers];
+	glGenBuffers(numBuffers, bufferIDs);
 
 	/* Create vertex buffer. */
 	glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[0]);
@@ -640,6 +860,27 @@ void Mesh::genBufferArrayID()
 
 }
 
+/******************************************************************************
+*                                                                             *
+*                          Mesh::genVertexArrayID()                           *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Generates the vertex array object buffer for this mesh. The vertex array   *
+*  object keeps track of the vertex attribute locations for this specific     *
+*  mesh. To draw this mesh, the vertex array object must be bound before      *
+*  telling OpenGL to draw its elements. The vertex array ID is stored in the  *
+*  vertexArrayID value.                                                       *
+*                                                                             *
+*******************************************************************************/
 void Mesh::genVertexArrayID()
 {
 	/* Generate Vertex Array Object. */
@@ -652,27 +893,52 @@ void Mesh::genVertexArrayID()
 		
 	/* Bind the vertex buffer. */
 	glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[0]);
-
-	/* Vertex position attribute. */
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
 	glBindAttribLocation(Geometry::shader->getProgram(), 0, "modelPostion");
 	glBindAttribLocation(Geometry::shader->getProgram(), 1, "modelColor");
 
-	/* Vertex color attribute. */
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
-		(char*)( sizeof(GLfloat) * 3 ));
-		
-	/* Bind the index buffer. */
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[1]);
+	/* Vertex position attribute. */
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+		sizeof(Vertex), (void*) ATTRIBUTE_0_OFFSET);
 
+	/* Vertex color attribute. */
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
+		sizeof(Vertex), (void*) ATTRIBUTE_1_OFFSET);
 }
 
+/******************************************************************************
+*                                                                             *
+*                            Mesh::cleanUp() (Destructor)                     *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Ensures that any allocated space is freed before the Mesh is discarded.    *
+*  This call can be made explicitly or implicitly by the descructor.          *
+*                                                                             *
+*******************************************************************************/
 void Mesh::cleanUp()
 {
-	glDeleteBuffers(NUM_BUFFERS, bufferIDs);
+	/* Delete the buffers on the graphics hardware. */
+	glDeleteBuffers(numBuffers, bufferIDs);
 	glDeleteBuffers(1, &vertexArrayID);
+
+	/* Free the space allocated on the heap for vertex/index data. */
 	delete[] vertices;
 	delete[] indices;
 	delete[] bufferIDs;
+
+	/* Remove any dangling pointers. */
+	vertices = NULL;
+	indices = NULL;
+	bufferIDs = NULL;
+
+	/* Set the number of vertices/indices to 0. */
 	numVertices = numIndices = 0;
 }
