@@ -158,7 +158,7 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes.at(i)->bufferIDs[1]);
 
 		/* Draw the elements to the window. */
-		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numFaces * 3, 
+		glDrawElements(meshes.at(i)->drawMode, meshes.at(i)->numIndices * 3, 
 			GL_UNSIGNED_SHORT, 0);
 
 	}

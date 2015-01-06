@@ -15,15 +15,15 @@
 #include "Shader.h"
 
 /* Field of View parameter. */
-#define  FOV   30.0f
+#define  FOV    30.0f
 /* Near clipping plane parameter. */
 #define  NEAR   0.1f
 /* Far clipping plane parameter. */
-#define  FAR   50.0f
+#define  FAR    100.0f
 
 /* Default vertex and fragment shader source files. */
-#define DEFAULT_VERTEX_SHADER "shader.vs"
-#define DEFAULT_FRAGMENT_SHADER "shader.fs"
+#define DEFAULT_VERTEX_SHADER "res/shader.vs"
+#define DEFAULT_FRAGMENT_SHADER "res/shader.fs"
 
 /******************************************************************************
  *																			  *

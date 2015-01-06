@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	/* Create the geometries. */
 	Mesh shape1 = Geometry::makeSphere(4);
 	Mesh shape2 = Geometry::makeCube();
-	Mesh shape3 = Geometry::makeTriangle();
+	Mesh shape3 = Geometry::makeCoordinatePlane();
 	Mesh shape4 = Geometry::makeIsocohedron();
 	Mesh shape5 = Geometry::makePlane({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
 
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 	glm::vec3 initialPositions[] = { 
 		{ -4.0f, +0.0f, -3.0f }, 
 		{ -2.0f, +0.0f, -3.0f }, 
-		{ +0.0f, +0.0f, -3.0f }, 
+		{ +0.0f, +0.0f, +0.0f }, 
 		{ +2.0f, +0.0f, -3.0f },
 		{ +4.0f, +0.0f, -3.0f }
 	};	 
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 			shape2Trans = glm::translate(initialPositions[1]) *
 				          glm::rotate(-rot, glm::vec3(0.0f, 0.5f, 1.0f));
 			shape3Trans = glm::translate(initialPositions[2]) *
-						  glm::rotate(rot, glm::vec3(0.0f, 1.0f, 5.0f));
+						  glm::rotate(0.0f, glm::vec3(0.0f, 1.0f, 5.0f));
 			shape4Trans = glm::translate(initialPositions[3]) *
 						  glm::rotate(-rot, glm::vec3(1.0f, 0.0f, 5.0f));
 			shape5Trans = glm::translate(initialPositions[4]) *

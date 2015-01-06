@@ -89,7 +89,7 @@ public:
 	/* Constructor */
 	Mesh() :
 		vertices(0), numVertices(0),
-		faces(0), numFaces(0) {}
+		indices(0), numIndices(0) {}
 
 	/* Calculate the number of bytes for the vertices. */
 	GLsizeiptr	vertexBufferSize() const
@@ -101,7 +101,7 @@ public:
 	/* Calculate the number of bytes for the indices. */
 	GLsizeiptr	indexBufferSize() const
 	{
-		return numFaces * sizeof(Triangle);
+		return numIndices * sizeof(GLuint);
 	}
 
 	void genBufferArrayID();
@@ -112,8 +112,8 @@ public:
 
 	Vertex*			vertices;
 	GLuint			numVertices;
-	Triangle*		faces;
-	GLuint			numFaces;
+	GLushort*		indices;
+	GLuint			numIndices;
 	GLuint*			bufferIDs;
 	GLuint			vertexArrayID;
 	GLenum			drawMode;

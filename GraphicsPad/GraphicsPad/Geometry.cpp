@@ -58,17 +58,17 @@ Mesh Geometry::makeTriangle()
 	memcpy(triangle.vertices, localVerts, sizeof(localVerts));
 
 	/* Define indices. */
-	Triangle localFaces[] =
+	GLushort localIndices[] =
 	{
-		{ 0, 1, 2 }
+		0, 1, 2
 	};
 
 	/* Record the number of indices. */
-	triangle.numFaces = ARRAY_SIZE(localFaces);
+	triangle.numIndices = ARRAY_SIZE(localIndices);
 
 	/* Allocate memory on the heap and copy data from stack. */
-	triangle.faces = new Triangle[triangle.numFaces];
-	memcpy(triangle.faces, localFaces, sizeof(localFaces));
+	triangle.indices = new GLushort[triangle.numIndices];
+	memcpy(triangle.indices, localIndices, sizeof(localIndices));
 
 	/* Generate buffer and vertex arrays. */
 	triangle.genBufferArrayID();
@@ -170,21 +170,21 @@ Mesh Geometry::makeCube()
 	memcpy(cube.vertices, localVerts, sizeof(localVerts));
 
 	/* Define indices. */
-	Triangle localFaces[] = {
-		{  0,  1,  2 }, {  0,  2,  3 }, // Top
-		{  4,  5,  6 }, {  4,  6,  7 }, // Front
-		{  8,  9, 10 }, {  8, 10, 11 }, // Right
-		{ 12, 14, 13 }, { 12, 14, 15 }, // Left
-		{ 16, 17, 18 }, { 16, 18, 19 }, // Back
-		{ 20, 22, 21 }, { 20, 23, 22 }, // Bottom
+	GLushort localIndices[] = {
+		  0,  1,  2,  0,  2,  3, // Top
+		  4,  5,  6,  4,  6,  7, // Front
+		  8,  9, 10,  8, 10, 11, // Right
+		 12, 14, 13, 12, 14, 15, // Left
+		 16, 17, 18, 16, 18, 19, // Back
+		 20, 22, 21, 20, 23, 22, // Bottom
 	};
 
 	/* Record the number of indices. */
-	cube.numFaces = ARRAY_SIZE(localFaces);
+	cube.numIndices = ARRAY_SIZE(localIndices);
 
 	/* Allocate memory on the heap and copy data from stack. */
-	cube.faces = new Triangle[cube.numFaces];
-	memcpy(cube.faces, localFaces, sizeof(localFaces));
+	cube.indices = new GLushort[cube.numIndices];
+	memcpy(cube.indices, localIndices, sizeof(localIndices));
 
 	/* Generate buffer and vertex arrays. */
 	cube.genBufferArrayID();
@@ -205,11 +205,11 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 
 	/* Calculate number of vertices and indices.  */
 	plane.numVertices = (GLint) NUM_TICKS * NUM_TICKS;
-	plane.numFaces = 6 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
+	plane.numIndices = 6 * (NUM_TICKS - 1) * (NUM_TICKS - 1);
 
 	/* Allocate heap space. */
 	plane.vertices = new Vertex[plane.numVertices];
-	plane.faces = new Triangle[plane.numFaces];
+	plane.indices = new GLushort[plane.numIndices];
 
 	GLushort index = 0;
 
@@ -234,18 +234,15 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 		for (GLint j = 0; j < NUM_TICKS - 1; j++)
 		{
 			/* Triangle 1. */
-			plane.faces[index++] = {
-				( i * NUM_TICKS ) + j, // Top-left
-				( i * NUM_TICKS ) + j + 1, // Top-right
-				( ( i + 1 ) * NUM_TICKS ) + j + 1 // Bottom-right
-			};
-
+			plane.indices[index++] = (i * NUM_TICKS) + j; // Top-left
+			plane.indices[index++] = (i * NUM_TICKS) + j + 1; // Top-right
+			plane.indices[index++] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
+			
 			/* Triangle 2. */
-			plane.faces[index++] = {
-				( i * NUM_TICKS ) + j, // Top-left
-				( ( i + 1 ) * NUM_TICKS ) + j + 1, // Bottom-right
-				( ( i + 1 ) * NUM_TICKS ) + j, // Bottom-left
-			};
+			plane.indices[index++] = (i * NUM_TICKS) + j; // Top-left
+			plane.indices[index++] = ((i + 1) * NUM_TICKS) + j + 1; // Bottom-right
+			plane.indices[index++] = ((i + 1) * NUM_TICKS) + j; // Bottom-left
+			
 		}
 	}
 
@@ -257,22 +254,30 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 	return plane;
 }
 
-//Mesh Geometry::makeCoordinatePlane()
-//{
-//	/* Define mesh. */
-//	Mesh coordPlane;
-//	coordPlane.drawMode = GL_LINES;
-//	coordPlane.vertices = new Vertex[4 * 2 * 30];
-//	coordPlane.faces = new 
-//	for (int i = 0; i < 60; i++)
-//	{
-//		coordPlane.vertices[i] = glm::vec3(i - 30f, -30, 0);
-//		coordPlane.vertices[i] = glm::vec3(i - 30f, +30, 0);
-//		coordPlane.vertices[i] = glm::vec3(-30f, i - 30, 0);
-//		coordPlane.vertices[i] = glm::vec3(+30f, i - 30, 0);
-//	}
-//
-//}
+Mesh Geometry::makeCoordinatePlane()
+{
+	/* Define mesh. */
+	Mesh coordPlane;
+	coordPlane.drawMode = GL_LINES;
+	coordPlane.numVertices = 61 * 4;
+	coordPlane.numIndices = 61 * 4;
+	coordPlane.vertices = new Vertex[coordPlane.numVertices];
+	coordPlane.indices = new GLushort[coordPlane.numIndices];
+	for (int i = 0; i < 239;)
+	{
+		coordPlane.vertices[i++] = { glm::vec3((float)(i - 30), 0.0f, -30.0f), glm::vec3(+1.0f, +1.0f, +1.0f) };
+		coordPlane.vertices[i++] = { glm::vec3((float)(i - 30), 0.0f, +30.0f), glm::vec3(+1.0f, +1.0f, +1.0f) };
+		coordPlane.vertices[i++] = { glm::vec3(-30, 0.0f, (float)(i - 30)), glm::vec3(+1.0f, +1.0f, +1.0f) };
+		coordPlane.vertices[i++] = { glm::vec3(+30, 0.0f, (float)(i - 30)), glm::vec3(+1.0f, +1.0f, +1.0f) };
+	}
+	for (int i = 0; i < coordPlane.numIndices; i++)
+		coordPlane.indices[i] = i;
+
+	coordPlane.genBufferArrayID();
+	coordPlane.genVertexArrayID();
+
+	return coordPlane;
+}
 
 Mesh Geometry::makeIsocohedron()
 {
@@ -325,33 +330,33 @@ Mesh Geometry::makeIsocohedron()
 
 	};
 
-	/* Define the faces locally. */
-	Triangle localFaces[] =
+	/* Define the indices locally. */
+	GLushort localIndices[] =
 	{
-		/* 5 faces around point 0 */
-		{  0, 11,  5 },
-		{  0,  5,  1 },
-		{  0,  1,  7 },
-		{  0,  7, 10 },
-		{  0, 10, 11 },
-		/* 5 adjacent faces */
-		{  1,  5,  9 },
-		{  5, 11,  4 },
-		{ 11, 10,  2 },
-		{ 10,  7,  6 },
-		{  7,  1,  8 },
-		/* 5 faces around point 3 */
-		{  3,  9,  4 },
-		{  3,  4,  2 },
-		{  3,  2,  6 },
-		{  3,  6,  8 },
-		{  3,  8,  9 },
-		/* 5 adjacent faces. */
-		{  4,  9,  5 },
-		{  2,  4, 11 },
-		{  6,  2, 10 },
-		{  8,  6,  7 },
-		{  9,  8,  1 },
+		/* 5 indices around point 0 */
+		 0, 11,  5,
+		 0,  5,  1,
+		 0,  1,  7,
+		 0,  7, 10,
+		 0, 10, 11,
+		/* 5 adjacent indices */
+		 1,  5,  9,
+		 5, 11,  4,
+		11, 10,  2,
+		10,  7,  6,
+		 7,  1,  8,
+		/* 5 indices around point 3 */
+		 3,  9,  4,
+		 3,  4,  2,
+		 3,  2,  6,
+		 3,  6,  8,
+		 3,  8,  9,
+		/* 5 adjacent indices. */
+		 4,  9,  5,
+		 2,  4, 11,
+		 6,  2, 10,
+		 8,  6,  7,
+		 9,  8,  1,
 	};
 
 	/* Record the number of vertices. */
@@ -362,11 +367,11 @@ Mesh Geometry::makeIsocohedron()
 	memcpy(ico.vertices, localVerts, sizeof(localVerts));
 
 	/* Record the number of indices. */
-	ico.numFaces = ARRAY_SIZE(localFaces);
+	ico.numIndices = ARRAY_SIZE(localIndices);
 
 	/* Allocate memory on the heap and copy data from stack. */
-	ico.faces = new Triangle[ico.numFaces];
-	memcpy(ico.faces, localFaces, sizeof(localFaces));
+	ico.indices = new GLushort[ico.numIndices];
+	memcpy(ico.indices, localIndices, sizeof(localIndices));
 
 	/* Generate buffer and vertex arrays. */
 	ico.genBufferArrayID();
@@ -408,7 +413,7 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	/* Constant offset. */
 	GLfloat t = (GLfloat)( 1.0 + std::sqrtf(5.0) ) / 2;
 
-	sphere.numFaces = ico.numFaces;
+	sphere.numIndices = ico.numIndices;
 	sphere.numVertices = ico.numVertices;
 
 	/* Get the vertices from icosohedron. */
@@ -416,10 +421,10 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	for (int i = 0; i < ico.numVertices; i++)
 		localVerts.push_back(ico.vertices[i]);
 
-	/* Get the faces from the icosohedron. */
-	std::vector<Triangle> localFaces;
-	for (int i = 0; i < ico.numFaces; i++)
-		localFaces.push_back(ico.faces[i]);
+	/* Get the indices from the icosohedron. */
+	std::vector<GLushort> localIndices;
+	for (int i = 0; i < ico.numIndices; i++)
+		localIndices.push_back(ico.indices[i]);
 
 	/* Normalize the position of the vertices. */
 	for (int i = 0; i < localVerts.size(); i++)
@@ -431,29 +436,42 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	/* Tesselate and normalize. */
 	for (int i = 0; i < tesselation; i++)
 	{
-		std::vector<Triangle> newFaces;
+		std::vector<GLushort> newIndices;
 
 		/* Split each triangle into 4 new triangles. */
-		for (Triangle tri : localFaces)
+		for (int i = 0; i < localIndices.size(); i += 3)
 		{
 			/* Get the middle points of each side of the triangle. */
-			a = getMiddlePoint(tri.v1, tri.v2, &localVerts, 
-					&middlePointIndexCache);
-			b = getMiddlePoint(tri.v2, tri.v3, &localVerts,
-					&middlePointIndexCache);
-			c = getMiddlePoint(tri.v3, tri.v1, &localVerts, 
-					&middlePointIndexCache);
+			a = getMiddlePoint(localIndices.at(i + 0), localIndices.at(i + 1), 
+					&localVerts, &middlePointIndexCache);
+			b = getMiddlePoint(localIndices.at(i + 1), localIndices.at(i + 2),
+					&localVerts, &middlePointIndexCache);
+			c = getMiddlePoint(localIndices.at(i + 2), localIndices.at(i + 0),
+					&localVerts, &middlePointIndexCache);
 
 			/* Add 4 new triangles in place of 'tri' in the new vector. */
-			newFaces.push_back({ tri.v1, a, c });
-			newFaces.push_back({ tri.v2, b, a });
-			newFaces.push_back({ tri.v3, c, b });
-			newFaces.push_back({ a, b, c });
+
+			/* Top  */
+			newIndices.push_back(localIndices.at(i + 0));
+			newIndices.push_back(a);
+			newIndices.push_back(c);
+			/* Bottom Right */
+			newIndices.push_back(localIndices.at(i + 1));
+			newIndices.push_back(b);
+			newIndices.push_back(a);
+			/* Bottom Left */
+			newIndices.push_back(localIndices.at(i + 2));
+			newIndices.push_back(c);
+			newIndices.push_back(b);
+			/* Middle */
+			newIndices.push_back(a);
+			newIndices.push_back(b);
+			newIndices.push_back(c);
 
 		}
 
-		/* Update the vector of local faces. */
-		localFaces = newFaces;
+		/* Update the vector of local indices. */
+		localIndices = newIndices;
 	}
 
 	/* Copy over the local vertex data. */
@@ -462,9 +480,9 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	memcpy(sphere.vertices, localVerts.data(), localVerts.size() * sizeof(Vertex));
 
 	/* Copy over the local face data. */
-	sphere.numFaces = localFaces.size();
-	sphere.faces = new Triangle[sphere.numFaces];
-	memcpy(sphere.faces, localFaces.data(), localFaces.size() * sizeof(Triangle));
+	sphere.numIndices = localIndices.size();
+	sphere.indices = new GLushort[sphere.numIndices];
+	memcpy(sphere.indices, localIndices.data(), localIndices.size() * sizeof(GLushort));
 	
 	/* Generate buffer and vertex arrays. */
 	sphere.genBufferArrayID();
@@ -545,7 +563,7 @@ void Mesh::genBufferArrayID()
 
 	/* Create index buffer. */
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize(), faces, 
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize(), indices, 
 		GL_STATIC_DRAW);
 
 }
@@ -582,7 +600,7 @@ void Mesh::cleanUp()
 	glDeleteBuffers(NUM_BUFFERS, bufferIDs);
 	glDeleteBuffers(1, &vertexArrayID);
 	delete[] vertices;
-	delete[] faces;
+	delete[] indices;
 	delete[] bufferIDs;
-	numVertices = numFaces = 0;
+	numVertices = numIndices = 0;
 }
