@@ -10,7 +10,18 @@
 
 /******************************************************************************
 *                                                                             *
-*                           Geometry::Geometry (class)                        *
+*                                 Default Values                              *
+*                                                                             *
+******************************************************************************/
+#define  DEFAULT_ROTATE_SPEED    0.01f
+#define  DEFAULT_MAX_MOVEMENT    50.0f
+#define  DEFAILT_POSITION        +0.0f, +0.0f, +0.0f
+#define  DEFAULT_VIEW_DRIECTION  +0.0f, +0.0f, -1.0f
+#define  DEFAULT_UP_DIRECTION    +0.0f, +1.0f, +0.0f
+
+/******************************************************************************
+*                                                                             *
+*                              Camera::Camera  (class)                        *
 *                                                                             *
 *******************************************************************************
 * MEMBERS                                                                     *
@@ -34,29 +45,29 @@ class Camera
 public:
 	/* Constructor. */
 	Camera();
-	/* Getters. */
-	glm::vec3* getPosition() { return &position; }
-	glm::vec3* getViewDirection() { return &viewDirection; }
-	glm::vec3* getUpDirection() { return &upDirection; }
+
 	/* Generate World-To-View Matrix. */
-	glm::mat4 getWorldToViewMatrix() const;
+	glm::mat4      getWorldToViewMatrix()   const;
 	/* Respond to moouse input. */
-	void updateLookAt(const glm::vec2 &newMousePosition);
-	/* Destructor. */
-	~Camera() {}
+	void           updateLookAt(const glm::vec2 &newMousePosition);
+
+	/* Getters. */
+	glm::vec3*     getPosition()            {  return &position;       }
+	glm::vec3*     getViewDirection()       {  return &viewDirection;  }
+	glm::vec3*     getUpDirection()         {  return &upDirection;    }
+
 /* Private members. */
 private:
 	/* Scaling factor for camera rotation. */
-	const float ROTATE_SPEED = 0.01f;
+	float          rotateSpeed;
 	/* Maximum amount of movement for the camera in one update. */
-	const float MAX_MOVEMENT = 50.0f;
+	float          maxMovement;
 	/* Position vector of the camera. */
-	glm::vec3 position;
+	glm::vec3      position;
 	/* Direction vector the camera is pointed. */
-	glm::vec3 viewDirection;
+	glm::vec3      viewDirection;
 	/* Direction vector indicating the top of the camera. */
-	glm::vec3 upDirection;
+	glm::vec3      upDirection;
 	/* Last recorded mouse position */
-	glm::vec2 oldMousePosition;
+	glm::vec2      oldMousePosition;
 };
-

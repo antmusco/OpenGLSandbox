@@ -82,7 +82,7 @@ GLsizeiptr Mesh::vertexBufferSize() const
 *******************************************************************************/
 GLsizeiptr Mesh::indexBufferSize() const
 {
-	return numIndices * sizeof(GLuint);
+	return numIndices * sizeof(GLushort);
 }
 
 /******************************************************************************
@@ -161,7 +161,7 @@ void Mesh::setIndices(GLuint n, GLushort* a)
 	/* Allocate space on the heap. */
 	indices = new GLushort[n];
 	/* Copy the data over to the allocated space. */
-	std::copy(a, a + n, indices);
+	memcpy(indices, a, sizeof(GLushort) * n);
 }
 void Mesh::setIndices(std::vector<GLushort>* i)
 {
@@ -413,14 +413,20 @@ Mesh Geometry::makePlane(glm::vec3 x, glm::vec3 y)
 		for (GLint j = 0; j < NUM_TICKS - 1; j++)
 		{
 			/* Triangle 1. */
-			localIndices.push_back((GLushort)( ( i * NUM_TICKS ) + j )); // Top-left
-			localIndices.push_back((GLushort)( ( i * NUM_TICKS ) + j + 1 )); // Top-right
-			localIndices.push_back((GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 )); // Bottom-right
+			localIndices.push_back(
+				(GLushort)( ( i * NUM_TICKS ) + j )); // Top-left
+			localIndices.push_back(
+				(GLushort)( ( i * NUM_TICKS ) + j + 1 )); // Top-right
+			localIndices.push_back(
+				(GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 )); // Bottom-right
 									  
 			/* Triangle 2. */		  
-			localIndices.push_back((GLushort)( ( i * NUM_TICKS ) + j )); // Top-left
-			localIndices.push_back((GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 )); // Bottom-right
-			localIndices.push_back((GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j )); // Bottom-left
+			localIndices.push_back(
+				(GLushort)( ( i * NUM_TICKS ) + j )); // Top-left
+			localIndices.push_back(
+				(GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j + 1 )); // Bottom-right
+			localIndices.push_back(
+				(GLushort)( ( ( i + 1 ) * NUM_TICKS ) + j )); // Bottom-left
 
 		}
 	}
@@ -712,13 +718,17 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	/* Temp variables for looping. */
 	GLushort a, b, c;
 
+	/* Declare the buffer of new indices. */
+	std::vector<GLushort> newIndices;
+
 	/* Tesselate and normalize. */
 	for (GLuint j = 0; j < tesselation; j++)
 	{
-		std::vector<GLushort> newIndices;
+		/* Clear out the buffer of new indices. */
+		newIndices.clear();
 
 		/* Split each triangle into 4 new triangles. */
-		for (GLuint i = 0; i < localIndices.size() - 2; i += 3)
+		for (GLuint i = 0; i < localIndices.size(); i += 3)
 		{
 			/* Get the middle points of each side of the triangle. */
 			a = getMiddlePoint(localIndices.at(i + 0), localIndices.at(i + 1), 
@@ -857,7 +867,6 @@ void Mesh::genBufferArrayID()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize(), indices, 
 		GL_STATIC_DRAW);
-
 }
 
 /******************************************************************************

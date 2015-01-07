@@ -17,7 +17,7 @@
 *                                                                             *
 *******************************************************************************
 * RETURNS                                                                     *
-*  A new Camera object with initialized variables.                            *
+*  void                                                                       *
 *                                                                             *
 *******************************************************************************
 * DESCRIPTION                                                                 *
@@ -26,18 +26,17 @@
 *                                                                             *
 *******************************************************************************/
 Camera::Camera() :
-	/* Center at origin. */
-	position(0.0f, 0.0f, 0.0f),
-	/* Look along -z axis. */
-	viewDirection(0.0f, 2.0f, -1.0f),
-	/* Top of camera is along +y axis. */
-	upDirection(0.0f, 1.0f, 0.0f)
+	position(DEFAILT_POSITION),
+	viewDirection(DEFAULT_VIEW_DRIECTION),
+	upDirection(DEFAULT_UP_DIRECTION),
+	rotateSpeed(DEFAULT_ROTATE_SPEED),
+	maxMovement(DEFAULT_MAX_MOVEMENT)
 {
 }
 
 /******************************************************************************
 *                                                                             *
-*                       Camera::getWorldToViewMatrix                          *
+*                       Camera::getWorldToViewMatrix()                        *
 *                                                                             *
 *******************************************************************************
 * PARAMETERS                                                                  *
@@ -64,20 +63,21 @@ void Camera::updateLookAt(const glm::vec2 &newMousePosition)
 	/* Calculate the change in mouse position. */
 	glm::vec2 mouseDelta = newMousePosition - oldMousePosition;
 
+	/* Get the horizontal rotation axis. */
+	glm::vec3 sideDirection = glm::cross(viewDirection, upDirection);	
+
 	/* If the mouse moved greater than MAX_MOVEMENT pixels, don't move */
-	if (glm::length(mouseDelta) <= MAX_MOVEMENT)
+	if (glm::length(mouseDelta) <= maxMovement) 
 	{
-		/* Get the horizontal rotation axis. */
-		glm::vec3 sideDirection = glm::cross(viewDirection, upDirection);
+			/* Generate the transformation = sideways * vertical rotation. */
+			glm::mat4 rotator =
+				glm::rotate(mouseDelta.x * rotateSpeed,	upDirection) *
+				glm::rotate(mouseDelta.y * rotateSpeed,	sideDirection);
 
-		/* Generate the transformation = sideways * vertical rotation. */
-		glm::mat4 rotator = glm::rotate(mouseDelta.x * ROTATE_SPEED, 
-			upDirection) * glm::rotate(mouseDelta.y * ROTATE_SPEED,
-			sideDirection);
-
-		/* Set the new view direction. */
-		viewDirection = glm::mat3(rotator) * viewDirection;
+			/* Set the new view direction. */
+			viewDirection = glm::mat3(rotator) * viewDirection;
 	}
+
 	/* Update the mouse position. */
 	oldMousePosition = newMousePosition;
 }

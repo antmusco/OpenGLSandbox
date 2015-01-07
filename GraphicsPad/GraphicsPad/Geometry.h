@@ -123,18 +123,18 @@ public:
 	void           genVertexArrayID();
 
 	/* Getters*/
-	Vertex*        getVertices()         const  {  return vertices;       }
-	Vertex         getVertex(GLuint i)   const  {  return vertices[i];    }
-	GLuint         getNumVertices()      const  {  return numVertices;    }
-	GLushort*      getIndices()          const  {  return indices;        }
-	GLushort       getIndex(GLuint i)    const  {  return indices[i];     }
-	GLuint         getNumIndices()       const  {  return numIndices;     }
-	GLuint*        getTextureID()        const  {  return textureID;      }
-	GLuint         getNumBuffers()       const  {  return numBuffers;     }
-	GLuint*        getBufferIDs()        const  {  return bufferIDs;      }
-	GLuint         getBufferID(GLuint i) const  {  return bufferIDs[i];   } 
-	GLuint         getVertexArrayID()    const  {  return vertexArrayID;  }
-	GLenum         getDrawMode()         const  {  return drawMode;       }
+	Vertex*        getVertices()         const   {  return vertices;       }
+	Vertex         getVertex(GLuint i)   const   {  return vertices[i];    }
+	GLuint         getNumVertices()      const   {  return numVertices;    }
+	GLushort*      getIndices()          const   {  return indices;        }
+	GLushort       getIndex(GLuint i)    const   {  return indices[i];     }
+	GLuint         getNumIndices()       const   {  return numIndices;     }
+	GLuint*        getTextureID()        const   {  return textureID;      }
+	GLuint         getNumBuffers()       const   {  return numBuffers;     }
+	GLuint*        getBufferIDs()        const   {  return bufferIDs;      }
+	GLuint         getBufferID(GLuint i) const   {  return bufferIDs[i];   } 
+	GLuint         getVertexArrayID()    const   {  return vertexArrayID;  }
+	GLenum         getDrawMode()         const   {  return drawMode;       }
 											    						 
 	/* Setters */							    						 
 	void           setVertices(GLuint n, 
@@ -143,11 +143,11 @@ public:
 	void           setIndices(GLuint n, 
                               GLushort* a);
 	void           setIndices(std::vector<GLushort>* v);
-	void           setTextureID(GLuint* t)      {  textureID        = t;  }
-	void           setNumBuffers(GLuint n)      {  numBuffers       = n;  }
-	void           setBufferIDs(GLuint* b)      {  bufferIDs        = b;  }
-	void           setVertexArrayID(GLuint v)   {  vertexArrayID    = v;  }
-	void           setDrawMode(GLenum d)        {  drawMode         = d;  }
+	void           setTextureID(GLuint* t)       {  textureID        = t;  }
+	void           setNumBuffers(GLuint n)       {  numBuffers       = n;  }
+	void           setBufferIDs(GLuint* b)       {  bufferIDs        = b;  }
+	void           setVertexArrayID(GLuint v)    {  vertexArrayID    = v;  }
+	void           setDrawMode(GLenum d)         {  drawMode         = d;  }
 
 	/* Destructor */ 
 	void           cleanUp();

@@ -101,7 +101,8 @@ void Display::updateViewport()
 	glViewport(0, 0, width, height);
 
 	/* Calculate the View-To-Projection matrix. */
-	viewToProjectionMatrix = glm::perspective(FOV, aspectRatio, NEAR, FAR);
+	viewToProjectionMatrix = glm::perspective(DEFAULT_FOV, aspectRatio, 
+		DEFAULT_NEAR_PLANE, DEFAULT_FAR_PLANE);
 }
 
 /******************************************************************************
@@ -142,9 +143,10 @@ void Display::repaint(std::vector<Mesh*> meshes,
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
 		/* Generate the Model -> Proj. transformation. */
-		modelToProjection = viewToProjectionMatrix *        // View  -> Proj.
-                            camera.getWorldToViewMatrix() *	// World -> View 
-                            (*modelToWorldMatrices.at(i));  // Model -> World
+		modelToProjectionMatrix = 
+			viewToProjectionMatrix *           // View  -> Proj.
+            camera.getWorldToViewMatrix() *	   // World -> View 
+            (*modelToWorldMatrices.at(i));     // Model -> World
 
 		/* Bind the appropriate vertex array. */
 		glBindVertexArray(meshes.at(i)->getVertexArrayID());
@@ -152,7 +154,7 @@ void Display::repaint(std::vector<Mesh*> meshes,
 
 		/* Send the transformation data down to the buffer. */
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
-			&modelToProjection[0][0]);
+			&modelToProjectionMatrix[0][0]);
 
 		/* Draw the elements to the window. */
 		glDrawElements(meshes.at(i)->getDrawMode(),      // Draw mode.
