@@ -22,6 +22,7 @@
 static void handleEvent(SDL_Event* event, Camera* camera)
 {
 	glm::vec3 move;
+	float scale = 0.5f;
 	if (event->type == SDL_MOUSEMOTION)
 	{
 		camera->updateLookAt({ event->motion.x, event->motion.y });
@@ -34,41 +35,41 @@ static void handleEvent(SDL_Event* event, Camera* camera)
 		case SDL_SCANCODE_RIGHT:
 			move = glm::cross(*(camera->getUpDirection()), *(camera->getViewDirection()));
 			move = move / glm::length(move);
-			*( camera->getPosition() ) += move;
+			*( camera->getPosition() ) += move * scale;
 			//*( camera->getViewDirection() ) += move;
 			break;
 		case SDL_SCANCODE_A:
 		case SDL_SCANCODE_LEFT:
 			move = glm::cross(*( camera->getViewDirection() ), *( camera->getUpDirection() ));
 			move = move / glm::length(move);
-			*( camera->getPosition() ) += move;
+			*( camera->getPosition() ) += move * scale;
 			//*( camera->getViewDirection() ) += move;
 			break;
 		case SDL_SCANCODE_S:
 		case SDL_SCANCODE_DOWN:
 			move = *(camera->getUpDirection());
 			move /= glm::length(move);
-			*( camera->getPosition() ) += move;
-			*( camera->getViewDirection() ) += move;
+			*( camera->getPosition() ) += move * scale;
+			*( camera->getViewDirection() ) += move * scale;
 			break;
 		case SDL_SCANCODE_W:
 		case SDL_SCANCODE_UP:
 			move = *( camera->getUpDirection() );
 			move /= -glm::length(move);
-			*( camera->getPosition() ) += move;
-			*( camera->getViewDirection() ) += move;
+			*( camera->getPosition() ) += move * scale;
+			*( camera->getViewDirection() ) += move * scale;
 			break;
 		case SDL_SCANCODE_Z:
 			move = *(camera->getViewDirection());
 			move = -1.0f * ( move / glm::length(move) );
-			*( camera->getPosition() ) += move;
-			*( camera->getViewDirection() ) += move;
+			*( camera->getPosition() ) += move * scale;
+			*( camera->getViewDirection() ) += move * scale;
 			break;
 		case SDL_SCANCODE_X:
 			move = *( camera->getViewDirection() );
 			move /= glm::length(move);
-			*( camera->getPosition() ) += move;
-			*( camera->getViewDirection() ) += move;
+			*( camera->getPosition() ) += move * scale;
+			*( camera->getViewDirection() ) += move * scale;
 			break;
 		case  SDL_SCANCODE_ESCAPE:
 			exit(0);
@@ -103,14 +104,17 @@ int main(int argc, char* argv[])
 	display.setShader(shader);
 	Camera* camera = display.getCamera();
 	Geometry::shader = &shader;
-	
+
+	char* earthObj = "res/earth.obj";
+	char* textFile = "res/SnowIceCover_Daily.bmp";
+
 	/* Create the geometries. */
-	Mesh sun = Geometry::makeSphere(3);
-	Mesh earth = Geometry::makeSphere(3);
+	//Mesh sun = Geometry::makeSphere(3);
+	Mesh earth = Geometry::loadObj(earthObj, textFile);
 
 	/* Add geometries to the list of meshes. */
 	std::vector<Mesh*> meshes;
-	meshes.push_back(&sun);
+	//meshes.push_back(&sun);
 	meshes.push_back(&earth);
 
 	/* Create transformation matrices. */
@@ -143,15 +147,15 @@ int main(int argc, char* argv[])
 		if (( clock() - t ) % 10)
 		{
 			/* Sun */
-			modelToWorldMatrices.push_back( 
-				&(glm::translate(initialPositions[1]) *
-				  glm::scale(glm::vec3(sun_scale, sun_scale, sun_scale)) * 
-				  glm::rotate(rot, glm::vec3(+0.0f, +1.0f, +0.0f)))
-			);
+			//modelToWorldMatrices.push_back( 
+			//	&(glm::translate(initialPositions[1]) *
+			//	  glm::scale(glm::vec3(sun_scale, sun_scale, sun_scale)) * 
+			//	  glm::rotate(rot, glm::vec3(+0.0f, +1.0f, +0.0f)))
+			//);
 
 			modelToWorldMatrices.push_back(
-				&(glm::translate(initialPositions[0] + (bases[0] * radius * cosf(rot)) + (bases[2] * radius * sinf(rot))) *
-				  glm::rotate(-rot, glm::vec3(0.0f, 0.5f, 1.0f)))
+				&(glm::translate(initialPositions[0] /*+ (bases[0] * radius * cosf(rot)) + (bases[2] * radius * sinf(rot))*/) *
+				  glm::rotate(-rot, glm::vec3(0.0f, 1.0f, 0.0f)))
 			);
 
 			display.repaint(meshes, modelToWorldMatrices);

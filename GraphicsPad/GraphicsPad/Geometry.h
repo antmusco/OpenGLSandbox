@@ -6,6 +6,7 @@
 *                                                                             *
 ******************************************************************************/
 #include <GL\glew.h>
+#include <SDL\SDL.h>
 #include <glm\glm.hpp>
 #include <vector>
 #include <map>
@@ -20,6 +21,7 @@
 #define DEFAULT_DRAW_MODE       GL_TRIANGLES
 #define ATTRIBUTE_0_OFFSET      (sizeof(GLfloat) * 0)
 #define ATTRIBUTE_1_OFFSET      (sizeof(GLfloat) * 3)
+#define ATTRIBUTE_2_OFFSET      (sizeof(GLfloat) * 6)
 
 /******************************************************************************
 *                                                                             *
@@ -87,6 +89,8 @@ struct Triangle
 *          drawn.                                                             *
 *  numIndices                                                                 *
 *          Number of indices used to draw the Mesh object.                    *
+*  texutreSurface                                                             *
+*          Pointer to the SDL_Surface conatining the texture data.            *
 *  textureID                                                                  *
 *          ID of the texture buffer in which the texture is located.          *
 *  numBuffers                                                                 *
@@ -119,6 +123,8 @@ public:
 	GLsizeiptr	   indexBufferSize()     const;
 	/* Generate the graphics buffers and IDs for the mesh.  */
 	void           genBufferArrayID();
+	/* Generate the texture buffer and ID for the mesh.  */
+	void           genTextureID(const char* filename);
 	/* Generate the vertex array object and ID for the mesh. */
 	void           genVertexArrayID();
 
@@ -129,7 +135,7 @@ public:
 	GLushort*      getIndices()          const   {  return indices;        }
 	GLushort       getIndex(GLuint i)    const   {  return indices[i];     }
 	GLuint         getNumIndices()       const   {  return numIndices;     }
-	GLuint*        getTextureID()        const   {  return textureID;      }
+	GLuint         getTextureID()        const   {  return textureID;      }
 	GLuint         getNumBuffers()       const   {  return numBuffers;     }
 	GLuint*        getBufferIDs()        const   {  return bufferIDs;      }
 	GLuint         getBufferID(GLuint i) const   {  return bufferIDs[i];   } 
@@ -143,7 +149,7 @@ public:
 	void           setIndices(GLuint n, 
                               GLushort* a);
 	void           setIndices(std::vector<GLushort>* v);
-	void           setTextureID(GLuint* t)       {  textureID        = t;  }
+	void           setTextureID(GLuint t)        {  textureID        = t;  }
 	void           setNumBuffers(GLuint n)       {  numBuffers       = n;  }
 	void           setBufferIDs(GLuint* b)       {  bufferIDs        = b;  }
 	void           setVertexArrayID(GLuint v)    {  vertexArrayID    = v;  }
@@ -160,7 +166,8 @@ private:
 	GLushort*      indices;
 	GLuint         numIndices;
 	/* Texture Data */
-	GLuint*        textureID;
+	SDL_Surface*   textureSurface;
+	GLuint         textureID;
 	/* Buffer Data */
 	GLuint         numBuffers;
 	GLuint*        bufferIDs;
@@ -199,6 +206,9 @@ public:
 	/* Plane. */
 	static Mesh      makePlane(glm::vec3  x, 
                                glm::vec3  y);
+	/* Load from .obj file. */
+	static Mesh      loadObj(const char* objFile, 
+                             const char* textFile = NULL);
 	/* Coordinate Plane. */
 	static Mesh      makeCoordinatePlane(GLint  xWidth, 
                                          GLint  yWidth, 

@@ -4,8 +4,16 @@
 *                                                                             *
 ******************************************************************************/
 #include "Geometry.h"
+#include <string>
+#include <iostream>
 #include <GL\glew.h>
 #include <glm\glm.hpp>
+#include <SDL\SDL_image.h>
+#include "tiny_obj_loader.h"
+
+#pragma comment( lib, "SDL2.lib" )
+#pragma comment( lib, "SDL2main.lib" )
+#pragma comment( lib, "SDL2_image.lib" )
 
 /******************************************************************************
 *                                                                             *
@@ -775,6 +783,50 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	return sphere;
 }
 
+Mesh Geometry::loadObj(const char* objFile, const char* textFile)
+{
+	Mesh obj;
+
+	std::vector<tinyobj::shape_t>    shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::string errMsg = tinyobj::LoadObj(shapes, materials, objFile);
+
+	if(!errMsg.empty())
+		std::cerr << "Error loading obj: " << errMsg << std::endl;
+
+	tinyobj::shape_t  s = shapes.at(0);
+
+	std::vector<Vertex> localVertices;
+	for(GLuint i = 0; i < (s.mesh.positions.size() / 3); i++) 
+	{
+		localVertices.push_back({
+			{s.mesh.positions.at((3 * i) + 0), s.mesh.positions.at((3 * i) + 1), s.mesh.positions.at((3 * i) + 2)},
+			{1.0f, 1.0f, 1.0f},
+			{s.mesh.texcoords.at((2 * i) + 0), s.mesh.texcoords.at((2 * i) + 1)}
+		});
+	}
+
+	std::vector<GLushort> localIndices;
+	for(GLuint i = 0; i < (s.mesh.indices.size() / 3); i++) 
+	{
+		localIndices.push_back((GLushort) s.mesh.indices.at((3 * i) + 0));
+		localIndices.push_back((GLushort) s.mesh.indices.at((3 * i) + 1));
+		localIndices.push_back((GLushort) s.mesh.indices.at((3 * i) + 2));
+	}
+
+		/* Set the vertices and indices of this mesh. */
+	obj.setVertices(&localVertices);
+	obj.setIndices(&localIndices);
+	
+	/* Generate buffer and vertex arrays. */
+	obj.genBufferArrayID();
+	obj.genVertexArrayID();
+	obj.genTextureID(textFile);
+
+	/* Return the mesh. */
+	return obj;
+}
+
 /******************************************************************************
 *                                                                             *
 *                       Geometry::getMiddlePoint (static)                     *
@@ -833,6 +885,34 @@ GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2,
 	return index;
 }
 
+void Mesh::genTextureID(const char* filename)
+{
+	glEnable(GL_TEXTURE_2D);
+	if(filename != NULL) 
+	{
+		textureSurface = IMG_Load(filename);
+		if(textureSurface != NULL) 
+		{
+			glGenTextures(1, &textureID);
+			glBindTexture(GL_TEXTURE_2D, textureID);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureSurface->w, 
+				textureSurface->h, 0, GL_BGR, GL_UNSIGNED_BYTE, 
+				textureSurface->pixels);
+		}
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	
+		glBindVertexArray(vertexArrayID);
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
+			(void*) ATTRIBUTE_2_OFFSET);
+		
+	}
+}
 /******************************************************************************
 *                                                                             *
 *                          Mesh::genBufferArrayID()                           *
@@ -906,12 +986,12 @@ void Mesh::genVertexArrayID()
 	glBindAttribLocation(Geometry::shader->getProgram(), 1, "modelColor");
 
 	/* Vertex position attribute. */
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
-		sizeof(Vertex), (void*) ATTRIBUTE_0_OFFSET);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
+		(void*) ATTRIBUTE_0_OFFSET);
 
 	/* Vertex color attribute. */
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
-		sizeof(Vertex), (void*) ATTRIBUTE_1_OFFSET);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,	sizeof(Vertex), 
+		(void*) ATTRIBUTE_1_OFFSET);
 }
 
 /******************************************************************************

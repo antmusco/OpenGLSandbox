@@ -7,6 +7,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="OribialBody.cpp" />
+    <ClCompile Include="tiny_obj_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h" />
@@ -14,6 +15,7 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="OribialBody.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shader.fs" />

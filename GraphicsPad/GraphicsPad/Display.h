@@ -100,5 +100,7 @@ private:
 	glm::mat4      viewToProjectionMatrix;
 	/* Uniform location for the full transformation. */
 	GLuint         modelToProjectionUniformLocation;
+	/* Uniform location for the texture. */
+	GLuint         textureUniformLocation;
 
 };

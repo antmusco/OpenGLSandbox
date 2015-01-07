@@ -156,6 +156,8 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
 			&modelToProjectionMatrix[0][0]);
 
+		glUniform1i(textureUniformLocation, 0);
+
 		/* Draw the elements to the window. */
 		glDrawElements(meshes.at(i)->getDrawMode(),      // Draw mode.
                        meshes.at(i)->getNumIndices(),    // Number of indices
@@ -176,6 +178,9 @@ void Display::setShader(Shader shader)
 	/* Get the location of the fullTransformMatrix uniform variable. */
 	modelToProjectionUniformLocation = glGetUniformLocation(
 		shader.getProgram(), "modelToProjectionMatrix");
+
+	textureUniformLocation = glGetUniformLocation(
+		shader.getProgram(), "texture");
 	
 }
 
