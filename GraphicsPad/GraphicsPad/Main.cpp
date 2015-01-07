@@ -11,6 +11,14 @@
 #include "Geometry.h"
 #include "Camera.h"
 
+
+#define  FULLSCREEN_ENABLED   true
+#define  DEFAULT_HEIGHT		  600
+#define  DEFAULT_WIDTH        800
+#define  DIMENSION_HEIGHT     0x0
+#define  DIMESNION_WIDTH      0x1
+
+
 static void handleEvent(SDL_Event* event, Camera* camera)
 {
 	glm::vec3 move;
@@ -62,8 +70,23 @@ static void handleEvent(SDL_Event* event, Camera* camera)
 			*( camera->getPosition() ) += move;
 			*( camera->getViewDirection() ) += move;
 			break;
+		case  SDL_SCANCODE_ESCAPE:
+			exit(0);
 		}
 	}
+}
+
+GLushort getScreenDimension(int dim) 
+{
+	SDL_Rect display;
+	SDL_GetDisplayBounds(0, &display);
+	
+	if(dim == DIMENSION_HEIGHT)
+		return display.h;
+	else if(dim == DIMESNION_WIDTH)
+		return display.w;
+	else
+		return -1;
 }
 
 int main(int argc, char* argv[])
@@ -72,45 +95,40 @@ int main(int argc, char* argv[])
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	/* Create the display, shader, and camera. */
-	Display display("Display", 800, 600);
+	int height = (FULLSCREEN_ENABLED) ? getScreenDimension(DIMENSION_HEIGHT) : DEFAULT_HEIGHT;
+	int width = (FULLSCREEN_ENABLED) ? getScreenDimension(DIMESNION_WIDTH) : DEFAULT_WIDTH;
+
+	Display display("Display", width, height);
 	Shader shader(DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
 	display.setShader(shader);
 	Camera* camera = display.getCamera();
 	Geometry::shader = &shader;
-
+	
 	/* Create the geometries. */
-	Mesh shape1 = Geometry::makeSphere(6);
-	Mesh shape2 = Geometry::makeCube();
-	Mesh shape3 = Geometry::makeCoordinatePlane(30.0f, 30.0f, 30.f);
-	Mesh shape4 = Geometry::makeCube();
-	Mesh shape5 = Geometry::makePlane({1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
+	Mesh sun = Geometry::makeSphere(3);
+	Mesh earth = Geometry::makeSphere(3);
 
 	/* Add geometries to the list of meshes. */
 	std::vector<Mesh*> meshes;
-	meshes.push_back(&shape1);
-	meshes.push_back(&shape2);
-	meshes.push_back(&shape3);
-	meshes.push_back(&shape4);
-	meshes.push_back(&shape5);
+	meshes.push_back(&sun);
+	meshes.push_back(&earth);
 
 	/* Create transformation matrices. */
 	std::vector<glm::mat4*> modelToWorldMatrices;
 
-	GLfloat rot = 0.0f;
-	glm::vec3 initialPositions[] = { 
-		{ -4.0f, +0.0f, -3.0f }, 
-		{ -2.0f, +0.0f, -3.0f }, 
-		{ +0.0f, +0.0f, +0.0f }, 
-		{ +2.0f, +0.0f, -3.0f },
-		{ +0.0f, +0.0f, +0.0f }
-	};	 
+	GLfloat    rot                 = + 0.0f;
+	GLfloat    radius              = +10.0f;
+	GLfloat    sun_scale           = + 3.0f;
+	glm::vec3  initialPositions[]  = { 
+		                                { +0.0f, +0.0f, +0.0f }, 
+		                                { +0.0f, +0.0f, +0.0f },
+	                                 };	 
+	glm::vec3  bases[]             = {
+                                	    {+1.0f, +0.0f, +0.0f},
+                                        {+0.0f, +1.0f, +0.0f},
+                                        {+0.0f, +0.0f, +1.0f}
+                                	 };
 
-	int i = 1;
-	for (Mesh* m : meshes)
-		std::cout << "Shape " << i++ 
-			<< ": vaoID = " << m->getVertexArrayID() 
-			<< " | buffIDs = " << m->getBufferIDs()[0] << " " << m->getBufferIDs()[1]
-			<< std::endl;
 
 	/* Main loop. */	
 	SDL_Event event;
@@ -124,31 +142,16 @@ int main(int argc, char* argv[])
 
 		if (( clock() - t ) % 10)
 		{
+			/* Sun */
 			modelToWorldMatrices.push_back( 
-				&(glm::translate(initialPositions[0] + 
-					glm::vec3(+14.0f, +0.0f, -2.0f) * cosf(rot) +
-					glm::vec3(+0.0f, +1.0f, +2.0f) * sinf(rot)) *
-				glm::rotate(rot, glm::vec3(1.0f, 0.5f, 0.0f)))
-			);
-
-			modelToWorldMatrices.push_back(
 				&(glm::translate(initialPositions[1]) *
-				glm::rotate(-rot, glm::vec3(0.0f, 0.5f, 1.0f)))
+				  glm::scale(glm::vec3(sun_scale, sun_scale, sun_scale)) * 
+				  glm::rotate(rot, glm::vec3(+0.0f, +1.0f, +0.0f)))
 			);
 
 			modelToWorldMatrices.push_back(
-				&(glm::translate(initialPositions[2]) *
-				glm::rotate(0.0f, glm::vec3(0.0f, 1.0f, 5.0f)))
-			);
-
-			modelToWorldMatrices.push_back( 
-				&(glm::translate(initialPositions[3]) *
-				glm::rotate(-rot, glm::vec3(1.0f, 0.0f, 5.0f)))
-			);
-
-			modelToWorldMatrices.push_back(
-				&(glm::translate(initialPositions[4]) *
-				glm::rotate(-rot, glm::vec3(0.0f, 1.0f, 0.0f)))
+				&(glm::translate(initialPositions[0] + (bases[0] * radius * cosf(rot)) + (bases[2] * radius * sinf(rot))) *
+				  glm::rotate(-rot, glm::vec3(0.0f, 0.5f, 1.0f)))
 			);
 
 			display.repaint(meshes, modelToWorldMatrices);

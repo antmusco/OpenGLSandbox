@@ -40,8 +40,8 @@ Display::Display(std::string title, GLushort width, GLushort height)
 {
 
 	/* Create the SDL window. */
-	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, 
-		SDL_WINDOWPOS_CENTERED, width, height, 
+	window = SDL_CreateWindow(title.c_str(), 0, 
+		0, width, height, 
 		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	/* Create the SDL GL context. */
@@ -66,7 +66,7 @@ Display::Display(std::string title, GLushort width, GLushort height)
 
 	/* Show the version of GLEW currently being used. */
 	fprintf(stdout, "Stats: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-
+	
 	/* Update the viewport. */
 	updateViewport();
 }

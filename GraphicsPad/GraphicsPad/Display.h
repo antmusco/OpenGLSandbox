@@ -57,6 +57,7 @@ class Display
 {
 /* Public Members. */
 public:
+
 	/* Constructor. */
 	Display(std::string title, GLushort width, GLushort height);
 

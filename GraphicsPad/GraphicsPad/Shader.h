@@ -40,4 +40,3 @@ private:
 	/* checkProgramError */
 	bool checkProgramError(GLuint program);
 };
-

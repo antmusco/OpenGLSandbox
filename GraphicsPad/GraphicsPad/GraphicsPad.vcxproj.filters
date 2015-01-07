@@ -6,12 +6,14 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="OribialBody.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="OribialBody.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shader.fs" />

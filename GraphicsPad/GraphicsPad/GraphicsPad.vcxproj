@@ -85,11 +85,13 @@
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="OribialBody.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Display.h" />
+    <ClInclude Include="OribialBody.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Geometry.h" />
   </ItemGroup>
