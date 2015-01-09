@@ -12,7 +12,7 @@
 #include "Camera.h"
 
 
-#define  FULLSCREEN_ENABLED   true
+#define  FULLSCREEN_ENABLED   false
 #define  DEFAULT_HEIGHT		  600
 #define  DEFAULT_WIDTH        800
 #define  DIMENSION_HEIGHT     0x0
@@ -22,7 +22,7 @@
 static void handleEvent(SDL_Event* event, Camera* camera)
 {
 	glm::vec3 move;
-	float scale = 0.5f;
+	float scale = 2.0f;
 	if (event->type == SDL_MOUSEMOTION)
 	{
 		camera->updateLookAt({ event->motion.x, event->motion.y });
@@ -105,61 +105,81 @@ int main(int argc, char* argv[])
 	Camera* camera = display.getCamera();
 	Geometry::shader = &shader;
 
-	char* earthObj = "res/earth.obj";
-	char* textFile = "res/SnowIceCover_Daily.bmp";
+	char* sphereObj = "res/earth.obj";
+	char* earthTexture = "res/SnowIceCover_Daily.bmp";
+	char* starsTexture = "res/stars.bmp";
+	char* sunTexture = "res/preview_sun.jpg";
 
-	/* Create the geometries. */
-	//Mesh sun = Geometry::makeSphere(3);
-	Mesh earth = Geometry::loadObj(earthObj, textFile);
 
-	/* Add geometries to the list of meshes. */
-	std::vector<Mesh*> meshes;
-	//meshes.push_back(&sun);
-	meshes.push_back(&earth);
-
-	/* Create transformation matrices. */
-	std::vector<glm::mat4*> modelToWorldMatrices;
-
-	GLfloat    rot                 = + 0.0f;
-	GLfloat    radius              = +10.0f;
-	GLfloat    sun_scale           = + 3.0f;
-	glm::vec3  initialPositions[]  = { 
-		                                { +0.0f, +0.0f, +0.0f }, 
-		                                { +0.0f, +0.0f, +0.0f },
-	                                 };	 
 	glm::vec3  bases[]             = {
                                 	    {+1.0f, +0.0f, +0.0f},
                                         {+0.0f, +1.0f, +0.0f},
                                         {+0.0f, +0.0f, +1.0f}
                                 	 };
 
+	/* Create the geometries. */
+	Mesh stars = Geometry::loadObj(sphereObj, starsTexture);
+	Mesh earth = Geometry::loadObj(sphereObj, earthTexture);
+	Mesh sun   = Geometry::loadObj(sphereObj, sunTexture);
+
+	/* Add geometries to the list of meshes. */
+	std::vector<Mesh*> meshes;
+	meshes.push_back(&stars);
+	meshes.push_back(&earth);
+	meshes.push_back(&sun);
+
+	/* Create transformation matrices. */
+	std::vector<glm::mat4*> modelToWorldMatrices;
+
+	GLfloat    timer               = +    0.0f;
+	GLfloat    dif                 = +    0.0f;
+	GLfloat    rot                 = +    0.0f;
+	GLfloat    radius              = +  250.0f;
+	GLfloat    stars_scale         = + 1000.0f;
+	GLfloat    sun_scale           = +   20.0f;
+	GLfloat    speed               = +   10.0f;
+	GLfloat    fps                 = +  100.0f;
+	glm::vec3  initialPositions[]  = { 
+		                                { +0.0f, +0.0f, +0.0f }, 
+		                                { +0.0f, +0.0f, +0.0f },
+	                                 };	 
 
 	/* Main loop. */	
 	SDL_Event event;
-	GLuint t = clock();
 	SDL_PollEvent(&event);
 
+	GLuint start, t1, t2;
+	t1 = start = SDL_GetTicks();
 	while (event.type != SDL_QUIT)
 	{
+		t2 = SDL_GetTicks();
 		/* Handle the event. */
 		handleEvent(&event, camera);
 
-		if (( clock() - t ) % 10)
+		if ((t2 - t1) >= ((1 / fps) * 1000))
 		{
-			/* Sun */
-			//modelToWorldMatrices.push_back( 
-			//	&(glm::translate(initialPositions[1]) *
-			//	  glm::scale(glm::vec3(sun_scale, sun_scale, sun_scale)) * 
-			//	  glm::rotate(rot, glm::vec3(+0.0f, +1.0f, +0.0f)))
-			//);
+			t1 = t2;
+			dif = 0.25f * timer * speed;
+			rot = 10.0f * timer * speed;
 
+			/* Stars */
+			modelToWorldMatrices.push_back( 
+				  &glm::scale(glm::vec3(stars_scale, stars_scale, stars_scale))
+			);
+
+			/* Earth */
 			modelToWorldMatrices.push_back(
-				&(glm::translate(initialPositions[0] /*+ (bases[0] * radius * cosf(rot)) + (bases[2] * radius * sinf(rot))*/) *
-				  glm::rotate(-rot, glm::vec3(0.0f, 1.0f, 0.0f)))
+				&(glm::translate(initialPositions[0] + (bases[0] * radius * cosf(0.25 * dif)) + (bases[2] * radius * sinf(0.25 * dif))) *
+				  glm::rotate(rot, glm::vec3(0.0f, 1.0f, 0.0f)))
+			);
+
+			/* Sun */
+			modelToWorldMatrices.push_back(
+				&(glm::scale(glm::vec3(sun_scale, sun_scale, sun_scale)))
 			);
 
 			display.repaint(meshes, modelToWorldMatrices);
-			rot += 0.001f;
+			timer += 0.0001f;
 		}
 		SDL_PollEvent(&event);
 	}

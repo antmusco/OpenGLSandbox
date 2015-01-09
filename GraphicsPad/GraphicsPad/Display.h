@@ -19,7 +19,7 @@
 /* Near clipping plane parameter. */
 #define  DEFAULT_NEAR_PLANE       0.1f
 /* Far clipping plane parameter. */
-#define  DEFAULT_FAR_PLANE        100.0f
+#define  DEFAULT_FAR_PLANE        1500.0f
 
 /* Default vertex and fragment shader source files. */
 #define  DEFAULT_VERTEX_SHADER    "res/shader.vs"

@@ -45,7 +45,7 @@ Shader* Geometry::shader = NULL;
 Mesh::Mesh() :
       vertices(0), numVertices(0),
       indices(0), numIndices(0),
-      textureID(0),
+      textureID(-1),
       numBuffers(DEFAULT_NUM_BUFFERS), bufferIDs(0), vertexArrayID(0),
       drawMode(DEFAULT_DRAW_MODE) {}
 
@@ -887,30 +887,43 @@ GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2,
 
 void Mesh::genTextureID(const char* filename)
 {
+	/* Enable Texture 2D. */
 	glEnable(GL_TEXTURE_2D);
+
+	/* If the filename is null, do nothing. */
 	if(filename != NULL) 
 	{
+		/* Load the SDL_Surface from the file. */
 		textureSurface = IMG_Load(filename);
+		/* The default color scheme is RGB. */
+		GLenum colorScheme = GL_RGB;
+
+		/* If the file is a bitmap, change the color scheme to BGR. */
+		std::string file(filename);
+		std::string ext = file.substr(file.find('.'), file.length() - 1);
+		if(ext == ".bmp") 
+			colorScheme = GL_BGR;
+
+		/* If the texture surface is null, do nothing. */
 		if(textureSurface != NULL) 
 		{
 			glGenTextures(1, &textureID);
 			glBindTexture(GL_TEXTURE_2D, textureID);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureSurface->w, 
-				textureSurface->h, 0, GL_BGR, GL_UNSIGNED_BYTE, 
+				textureSurface->h, 0, colorScheme, GL_UNSIGNED_BYTE, 
 				textureSurface->pixels);
-		}
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	
-		glBindVertexArray(vertexArrayID);
+			glBindVertexArray(vertexArrayID);
 
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
-			(void*) ATTRIBUTE_2_OFFSET);
-		
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
+				(void*) ATTRIBUTE_2_OFFSET);
+		}
 	}
 }
 /******************************************************************************

@@ -151,10 +151,14 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		/* Bind the appropriate vertex array. */
 		glBindVertexArray(meshes.at(i)->getVertexArrayID());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes.at(i)->getBufferIDs()[1]);
+		if(meshes.at(i)->getTextureID() != -1)
+			glBindTexture(GL_TEXTURE_2D, meshes.at(i)->getTextureID());
 
 		/* Send the transformation data down to the buffer. */
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
 			&modelToProjectionMatrix[0][0]);
+
+			
 
 		glUniform1i(textureUniformLocation, 0);
 
