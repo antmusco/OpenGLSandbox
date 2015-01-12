@@ -6,6 +6,7 @@
 #include <gl\glew.h>
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtx\transform.hpp>
 #include <SDL\SDL_video.h>
 #include <iostream>
 #include "Display.h"
@@ -69,6 +70,7 @@ Display::Display(std::string title, GLushort width, GLushort height)
 	
 	/* Update the viewport. */
 	updateViewport();
+
 }
 
 /******************************************************************************
@@ -157,8 +159,6 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		/* Send the transformation data down to the buffer. */
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
 			&modelToProjectionMatrix[0][0]);
-
-			
 
 		glUniform1i(textureUniformLocation, 0);
 

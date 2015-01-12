@@ -6,7 +6,6 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="OribialBody.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="EventManager.cpp" />

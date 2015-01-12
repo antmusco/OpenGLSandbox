@@ -787,8 +787,10 @@ Mesh Geometry::loadObj(const char* objFile, const char* textFile)
 {
 	Mesh obj;
 
+	glm::vec3                        color = {+1.0f, +1.0f, +1.0f};
 	std::vector<tinyobj::shape_t>    shapes;
 	std::vector<tinyobj::material_t> materials;
+
 	std::string errMsg = tinyobj::LoadObj(shapes, materials, objFile);
 
 	if(!errMsg.empty())
@@ -801,8 +803,8 @@ Mesh Geometry::loadObj(const char* objFile, const char* textFile)
 	{
 		localVertices.push_back({
 			{s.mesh.positions.at((3 * i) + 0), s.mesh.positions.at((3 * i) + 1), s.mesh.positions.at((3 * i) + 2)},
-			{1.0f, 1.0f, 1.0f},
-			{s.mesh.texcoords.at((2 * i) + 0), s.mesh.texcoords.at((2 * i) + 1)}
+			color,
+			{1 - s.mesh.texcoords.at((2 * i) + 0), s.mesh.texcoords.at((2 * i) + 1)}
 		});
 	}
 

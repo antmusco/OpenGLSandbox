@@ -18,6 +18,9 @@
 #define  DEFAULT_WIDTH        800
 #define  DIMENSION_HEIGHT     0x0
 #define  DIMESNION_WIDTH      0x1
+#define  DEGREES_PER_DAY      9.863014e-1f
+#define  DEGREES_PER_HOUR     4.109589e-2f
+#define  DEGREES_PER_MINUTE   6.849315e-4f
 
 GLushort getScreenDimension(int dim) 
 {
@@ -48,17 +51,17 @@ int main(int argc, char* argv[])
 	Geometry::shader = &shader;
 	EventManager eventManager(camera);
 
-	char* sphereObj = "res/earth.obj";
-	char* earthTexture = "res/SnowIceCover_Daily.bmp";
+	char* sphereObj = "res/body.obj";
+	char* earthTexture = "res/earth.jpg";
 	char* starsTexture = "res/stars.bmp";
 	char* sunTexture = "res/preview_sun.jpg";
 
-
-	glm::vec3  bases[]             = {
-                                	    {+1.0f, +0.0f, +0.0f},
-                                        {+0.0f, +1.0f, +0.0f},
-                                        {+0.0f, +0.0f, +1.0f}
-                                	 };
+	glm::vec3  bases[] =
+	{
+        {+1.0f, +0.0f, +0.0f},
+        {+0.0f, +1.0f, +0.0f},
+        {+0.0f, +0.0f, +1.0f}
+    };
 
 	/* Create the geometries. */
 	Mesh stars = Geometry::loadObj(sphereObj, starsTexture);
@@ -80,12 +83,13 @@ int main(int argc, char* argv[])
 	GLfloat    radius              = +  250.0f;
 	GLfloat    stars_scale         = + 1000.0f;
 	GLfloat    sun_scale           = +   20.0f;
-	GLfloat    speed               = +   10.0f;
+	GLfloat    speed               = +  0.050f;
 	GLfloat    fps                 = +  100.0f;
-	glm::vec3  initialPositions[]  = { 
-		                                { +0.0f, +0.0f, +0.0f }, 
-		                                { +0.0f, +0.0f, +0.0f },
-	                                 };	 
+	glm::vec3  initialPositions[]  = 
+	{ 
+		{ +0.0f, +0.0f, +0.0f }, // Earth 
+		{ +0.0f, +0.0f, +0.0f }, // Sun
+	};	 
 
 	/* Main loop. */	
 	SDL_Event event;
@@ -103,8 +107,7 @@ int main(int argc, char* argv[])
 		if ((t2 - t1) >= ((1 / fps) * 1000))
 		{
 			t1 = t2;
-			dif = 0.25f * timer * speed;
-			rot = 10.0f * timer * speed;
+			rot = 360 * (timer / DEGREES_PER_DAY);
 
 			/* Stars */
 			modelToWorldMatrices.push_back( 
@@ -113,8 +116,8 @@ int main(int argc, char* argv[])
 
 			/* Earth */
 			modelToWorldMatrices.push_back(
-				&(glm::translate(initialPositions[0] + (bases[0] * radius * cosf(0.25 * dif)) + (bases[2] * radius * sinf(0.25 * dif))) *
-				  glm::rotate(rot, glm::vec3(0.0f, 1.0f, 0.0f)))
+				&(glm::translate(initialPositions[0] + (bases[0] * radius * cosf(timer)) + (bases[2] * radius * sinf(timer))) *
+				  glm::rotate(-rot, glm::vec3(0.0f, 1.0f, 0.0f)))
 			);
 
 			/* Sun */
@@ -123,7 +126,7 @@ int main(int argc, char* argv[])
 			);
 
 			display.repaint(meshes, modelToWorldMatrices);
-			timer += 0.0001f;
+			timer += DEGREES_PER_MINUTE * speed;
 		}
 		SDL_PollEvent(&event);
 	}
