@@ -63,8 +63,9 @@ void Camera::updateLookAt(const glm::vec2 &newMousePosition)
 	/* Calculate the change in mouse position. */
 	glm::vec2 mouseDelta = newMousePosition - oldMousePosition;
 
-	/* Get the horizontal rotation axis. */
+	/* Get the horizontal rotation axis and normalize. */
 	glm::vec3 sideDirection = glm::cross(viewDirection, upDirection);	
+	sideDirection /= glm::length(sideDirection);
 
 	/* If the mouse moved greater than MAX_MOVEMENT pixels, don't move */
 	if (glm::length(mouseDelta) <= maxMovement) 

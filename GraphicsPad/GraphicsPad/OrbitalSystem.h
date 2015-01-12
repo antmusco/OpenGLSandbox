@@ -7,7 +7,17 @@
 
 #include  <string>
 #include  <map>
-#include "OribialBody.h"
+#include  <vector>
+#include  "OrbitalBody.h"
+#include  "GL\glew.h"
+#include  "Geometry.h"
+
+#define   SIM_HOURS_PER_REAL_SECOND            4.0f
+#define   SECONDS_PER_HOUR                  3600.0f
+#define   MIN_SECONDS                       1000.0f                
+#define   G                            6.67384e-11f
+#define   STARS_OBJ                  "res/body.obj"
+#define   STARS_TEXTURE             "res/stars.bmp"
 
 /******************************************************************************
  *																			  *
@@ -21,49 +31,6 @@
  *  radius                                                                    *
  *          METERS                                                            *
  *          Bounding distance from the center of the object to its surface.   *
- *  scale                                                                     *
- *          Multiplier for the volume of this body.                           *
- *  mass                                                                      *
- *          KILOGRAMS                                                         *
- *          Amount of mass this object contains in kilograms.                 *
- *  gravityVector                                                             *
- *          (KILOGRAMS * METERS) / SECOND^2                                   *
- *          Vector which indicates the force of gravity felt by the body.     *
- *  linearPosition                                                            *
- *          METERS:                                                           *
- *          Position vector representing the location in world space.         *
- *  linearVelocity                                                            *
- *          METERS / SECOND:                                                  *
- *          Velocity vector representing the direction and magnitude of       *
- *          motion in world space.                                            *
- *  linearAccel                                                               *
- *          METERS / SECOND^2                                                 *
- *          Acceleration vector representing the direction and magnitude of   *
- *          the change in motion in world space.                              *
- *  linearThrust                                                              *
- *          (KILOGRAMS * METERS) / SECOND^2                                   *
- *          Force vector representing the direction and magnitude of the      *
- *          change in acceleration in world space.                            *
- *  rotationalAxis                                                            *
- *          Vector representing the axis of rotation for the body.            *
- *  angularPosition                                                           *
- *          RADIANS                                                           *
- *          Number of radians (0 - 2*pi) the body has rotated.                *
- *  angularVelocity                                                           *
- *          RADIANS / SECOND                                                  *
- *          Float value representing the change in angular position with      *
- *          respect to time.                                                  *
- *  angularAccel  y                                                           *
- *          RADIANS / SECOND&2                                                *
- *          Float value representing the change in angular velocity with      *
- *          respect to time.                                                  *
- *  angularThrust                                                             *
- *          RADIANS / SECOND^2                                                *
- *          Float value representing the change in angular acceleration with  *
- *          respect to time.                                                  *
- *  transformationMatrix                                                      *
- *          Matrix describing the body's current transformation, which is     *
- *          based on the current linear and angular positions of the body.    *
  *                                                                            *
  ******************************************************************************
  * DESCRIPTION                                                                *
@@ -77,7 +44,27 @@ class OrbitalSystem
 {
 /* Public Members. */
 public:
-	OrbitalSystem();
-	~OrbitalSystem();
+
+	/* Default constructor. */
+	OrbitalSystem() 
+	{
+		stars = Geometry::loadObj(STARS_OBJ, STARS_TEXTURE);
+	}
+
+	void           addBody(OrbitalBody* body);
+	void           removeBody(std::string name);
+	void           interpolate(GLfloat seconds);
+	void           calculateForces();
+
+	GLuint         starsRadius = 1000;
+
+private:
+	
+	/* Collection of orbital bodies in this system. */
+	std::map<std::string,OrbitalBody*> bodies;
+	/* Collection of names for the orbital bodies in this system.*/
+	std::vector<std::string>           names;
+	Mesh                               stars;
+
 };
 

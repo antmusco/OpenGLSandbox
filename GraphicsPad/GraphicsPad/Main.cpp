@@ -11,6 +11,8 @@
 #include "Geometry.h"
 #include "Camera.h"
 #include "EventManager.h"
+#include "OrbitalSystem.h"
+#include "OrbitalBody.h"
 
 
 #define  FULLSCREEN_ENABLED   false
@@ -53,7 +55,7 @@ int main(int argc, char* argv[])
 
 	char* sphereObj = "res/body.obj";
 	char* earthTexture = "res/earth.jpg";
-	char* starsTexture = "res/stars.bmp";
+	char* starsTexture = "res/milkyway.jpg";
 	char* sunTexture = "res/preview_sun.jpg";
 
 	glm::vec3  bases[] =
@@ -64,6 +66,7 @@ int main(int argc, char* argv[])
     };
 
 	/* Create the geometries. */
+	OrbitalSystem system;
 	Mesh stars = Geometry::loadObj(sphereObj, starsTexture);
 	Mesh earth = Geometry::loadObj(sphereObj, earthTexture);
 	Mesh sun   = Geometry::loadObj(sphereObj, sunTexture);
@@ -77,19 +80,22 @@ int main(int argc, char* argv[])
 	/* Create transformation matrices. */
 	std::vector<glm::mat4*> modelToWorldMatrices;
 
-	GLfloat    timer               = +    0.0f;
-	GLfloat    dif                 = +    0.0f;
-	GLfloat    rot                 = +    0.0f;
-	GLfloat    radius              = +  250.0f;
-	GLfloat    stars_scale         = + 1000.0f;
-	GLfloat    sun_scale           = +   20.0f;
-	GLfloat    speed               = +  0.050f;
-	GLfloat    fps                 = +  100.0f;
+	GLfloat    timer               = +      0.0f;
+	GLfloat    dif                 = +      0.0f;
+	GLfloat    rot                 = +      0.0f;
+	GLfloat    radius              = +    500.0f;
+	GLfloat    stars_scale         = +  10000.0f;
+	GLfloat    sun_scale           = +     50.0f;
+	GLfloat    speed               = +    0.050f;
+	GLfloat    fps                 = +    100.0f;
 	glm::vec3  initialPositions[]  = 
 	{ 
 		{ +0.0f, +0.0f, +0.0f }, // Earth 
 		{ +0.0f, +0.0f, +0.0f }, // Sun
 	};	 
+
+	camera->setPosition({radius + 5.0f, 1.0f, +0.0f});
+	camera->setViewDirection({radius + 4.0f, 0.0f, +0.0f});
 
 	/* Main loop. */	
 	SDL_Event event;

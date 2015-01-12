@@ -9,16 +9,19 @@
     <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="EventManager.cpp" />
+    <ClCompile Include="OrbitalSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="OribialBody.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="EventManager.h" />
+    <ClInclude Include="OrbitalSystem.h" />
+    <ClInclude Include="OrbitalBody.h" />
+    <ClInclude Include="Planet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shader.fs" />

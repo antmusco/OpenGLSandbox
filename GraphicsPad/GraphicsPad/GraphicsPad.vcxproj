@@ -87,6 +87,7 @@
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="OrbitalSystem.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
@@ -95,7 +96,9 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="EventManager.h" />
-    <ClInclude Include="OribialBody.h" />
+    <ClInclude Include="OrbitalSystem.h" />
+    <ClInclude Include="OrbitalBody.h" />
+    <ClInclude Include="Planet.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="tinyxml2.h" />
