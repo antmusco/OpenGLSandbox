@@ -8,6 +8,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="OribialBody.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
+    <ClCompile Include="EventManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Display.h" />
@@ -16,6 +18,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="OribialBody.h" />
     <ClInclude Include="tiny_obj_loader.h" />
+    <ClInclude Include="tinyxml2.h" />
+    <ClInclude Include="EventManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shader.fs" />

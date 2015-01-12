@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Geometry.h"
 #include "Camera.h"
+#include "EventManager.h"
 
 
 #define  FULLSCREEN_ENABLED   false
@@ -17,65 +18,6 @@
 #define  DEFAULT_WIDTH        800
 #define  DIMENSION_HEIGHT     0x0
 #define  DIMESNION_WIDTH      0x1
-
-
-static void handleEvent(SDL_Event* event, Camera* camera)
-{
-	glm::vec3 move;
-	float scale = 2.0f;
-	if (event->type == SDL_MOUSEMOTION)
-	{
-		camera->updateLookAt({ event->motion.x, event->motion.y });
-	}
-	else if (event->type == SDL_KEYDOWN)
-	{
-		switch (event->key.keysym.scancode)
-		{
-		case SDL_SCANCODE_D:
-		case SDL_SCANCODE_RIGHT:
-			move = glm::cross(*(camera->getUpDirection()), *(camera->getViewDirection()));
-			move = move / glm::length(move);
-			*( camera->getPosition() ) += move * scale;
-			//*( camera->getViewDirection() ) += move;
-			break;
-		case SDL_SCANCODE_A:
-		case SDL_SCANCODE_LEFT:
-			move = glm::cross(*( camera->getViewDirection() ), *( camera->getUpDirection() ));
-			move = move / glm::length(move);
-			*( camera->getPosition() ) += move * scale;
-			//*( camera->getViewDirection() ) += move;
-			break;
-		case SDL_SCANCODE_S:
-		case SDL_SCANCODE_DOWN:
-			move = *(camera->getUpDirection());
-			move /= glm::length(move);
-			*( camera->getPosition() ) += move * scale;
-			*( camera->getViewDirection() ) += move * scale;
-			break;
-		case SDL_SCANCODE_W:
-		case SDL_SCANCODE_UP:
-			move = *( camera->getUpDirection() );
-			move /= -glm::length(move);
-			*( camera->getPosition() ) += move * scale;
-			*( camera->getViewDirection() ) += move * scale;
-			break;
-		case SDL_SCANCODE_Z:
-			move = *(camera->getViewDirection());
-			move = -1.0f * ( move / glm::length(move) );
-			*( camera->getPosition() ) += move * scale;
-			*( camera->getViewDirection() ) += move * scale;
-			break;
-		case SDL_SCANCODE_X:
-			move = *( camera->getViewDirection() );
-			move /= glm::length(move);
-			*( camera->getPosition() ) += move * scale;
-			*( camera->getViewDirection() ) += move * scale;
-			break;
-		case  SDL_SCANCODE_ESCAPE:
-			exit(0);
-		}
-	}
-}
 
 GLushort getScreenDimension(int dim) 
 {
@@ -104,6 +46,7 @@ int main(int argc, char* argv[])
 	display.setShader(shader);
 	Camera* camera = display.getCamera();
 	Geometry::shader = &shader;
+	EventManager eventManager(camera);
 
 	char* sphereObj = "res/earth.obj";
 	char* earthTexture = "res/SnowIceCover_Daily.bmp";
@@ -153,8 +96,9 @@ int main(int argc, char* argv[])
 	while (event.type != SDL_QUIT)
 	{
 		t2 = SDL_GetTicks();
+
 		/* Handle the event. */
-		handleEvent(&event, camera);
+		eventManager.handleSDLEvent(&event);
 
 		if ((t2 - t1) >= ((1 / fps) * 1000))
 		{

@@ -84,18 +84,22 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Display.cpp" />
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="OribialBody.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Display.h" />
+    <ClInclude Include="EventManager.h" />
     <ClInclude Include="OribialBody.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
