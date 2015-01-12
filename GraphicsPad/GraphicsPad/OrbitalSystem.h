@@ -12,9 +12,9 @@
 #include  "GL\glew.h"
 #include  "Geometry.h"
 
-#define   SIM_HOURS_PER_REAL_SECOND            4.0f
+#define   SIM_HOURS_PER_REAL_SECOND          0.005f
 #define   SECONDS_PER_HOUR                  3600.0f
-#define   MIN_SECONDS                       1000.0f                
+#define   MIN_SECONDS                        100.0f                
 #define   G                            6.67384e-11f
 #define   STARS_OBJ                  "res/body.obj"
 #define   STARS_TEXTURE             "res/stars.bmp"
@@ -55,7 +55,8 @@ public:
 	void           removeBody(std::string name);
 	void           interpolate(GLfloat seconds);
 	void           calculateForces();
-
+	std::vector<std::string>*  getNames()   { return &names;    }
+	OrbitalBody*   getBody(std::string name) { return bodies[name]; }
 	GLuint         starsRadius = 1000;
 
 private:
@@ -64,7 +65,7 @@ private:
 	std::map<std::string,OrbitalBody*> bodies;
 	/* Collection of names for the orbital bodies in this system.*/
 	std::vector<std::string>           names;
-	Mesh                               stars;
+	Mesh*                              stars;
 
 };
 

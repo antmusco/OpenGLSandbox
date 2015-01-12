@@ -783,9 +783,9 @@ Mesh Geometry::makeSphere(GLuint tesselation)
 	return sphere;
 }
 
-Mesh Geometry::loadObj(const char* objFile, const char* textFile)
+Mesh* Geometry::loadObj(const char* objFile, const char* textFile)
 {
-	Mesh obj;
+	Mesh* obj = new Mesh();
 
 	glm::vec3                        color = {+1.0f, +1.0f, +1.0f};
 	std::vector<tinyobj::shape_t>    shapes;
@@ -817,13 +817,13 @@ Mesh Geometry::loadObj(const char* objFile, const char* textFile)
 	}
 
 		/* Set the vertices and indices of this mesh. */
-	obj.setVertices(&localVertices);
-	obj.setIndices(&localIndices);
+	obj->setVertices(&localVertices);
+	obj->setIndices(&localIndices);
 	
 	/* Generate buffer and vertex arrays. */
-	obj.genBufferArrayID();
-	obj.genVertexArrayID();
-	obj.genTextureID(textFile);
+	obj->genBufferArrayID();
+	obj->genVertexArrayID();
+	obj->genTextureID(textFile);
 
 	/* Return the mesh. */
 	return obj;

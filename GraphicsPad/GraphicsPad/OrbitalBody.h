@@ -16,7 +16,7 @@
 *                           Defined Constants / Macros                        *
 *                                                                             *
 ******************************************************************************/
-#define   RADIANS_PER_REV    2 * M_PI
+#define   DEGREES_PER_REV    360
 #define   DEFAULT_ROT_AXIS   {+0.0f, +1.0f, +0.0f}
 
 /******************************************************************************
@@ -59,18 +59,18 @@
  *  rotationalAxis                                                            *
  *          Vector representing the axis of rotation for the body.            *
  *  angularPosition                                                           *
- *          RADIANS                                                           *
- *          Number of radians (0 - 2*pi) the body has rotated.                *
+ *          DEGREES                                                           *
+ *          Number of degrees (0 - 360) the body has rotated.                 *
  *  angularVelocity                                                           *
- *          RADIANS / SECOND                                                  *
+ *          DEGREES / SECOND                                                  *
  *          Float value representing the change in angular position with      *
  *          respect to time.                                                  *
  *  angularAccel  y                                                           *
- *          RADIANS / SECOND&2                                                *
+ *          DEGREES / SECOND&2                                                *
  *          Float value representing the change in angular velocity with      *
  *          respect to time.                                                  *
  *  angularThrust                                                             *
- *          RADIANS / SECOND^2                                                *
+ *          DEGREES / SECOND^2                                                *
  *          Float value representing the change in angular acceleration with  *
  *          respect to time.                                                  *
  *  transformationMatrix                                                      *
@@ -93,7 +93,6 @@ public:
 
 	/* Default Constructor. */
 	OrbitalBody() :
-		name(0),
 		radius(0),
 		scale(1),
 		mass(0),  
@@ -145,13 +144,13 @@ public:
 		angularPosition += dt * angularVelocity;
 
 		/* Account for full revolution. */
-		if(angularPosition > RADIANS_PER_REV) 
-			angularPosition -= RADIANS_PER_REV;
+		if(angularPosition > DEGREES_PER_REV) 
+			angularPosition -= DEGREES_PER_REV;
 	}
 												  
 	/* Getters. */			
 	std::string    getName()            const     {  return name;            }
-	Mesh           getGeometry()        const     {  return geometry;        }
+	Mesh*          getGeometry()        const     {  return geometry;        }
 	GLfloat        getRadius()          const     {  return radius;          }
 	glm::vec3      getScale()           const     {  return scale;           }
 	GLfloat        getMass()            const     {  return mass;            }
@@ -168,7 +167,7 @@ public:
 												  
 	/* Setters. */			
 	void           setName(std::string n)         {  name              = n;  }
-	void           setGeometry(Mesh* g)           {  geometry          = *g; }
+	void           setGeometry(Mesh* g)           {  geometry          = g;  }
 	void           setRadius(GLfloat r)           {  radius            = r;  }
 	void           setScale(glm::vec3 s)          {  scale             = s;  }
 	void           setMass(GLfloat m)             {  mass              = m;  }
@@ -188,7 +187,7 @@ protected:
 	/* Name of the body. */
 	std::string    name;
 	/* Mesh describing the geometry of the body. */
-	Mesh           geometry;
+	Mesh*          geometry;
 	/* Bounding radius of the orbital body. */
 	GLfloat        radius;
 	/* Scale of x, y, and z dimensions of the body. */

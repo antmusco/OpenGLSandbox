@@ -65,7 +65,7 @@ public:
 	void updateViewport();
 	/* Repaint the graphics. */
 	void repaint(std::vector<Mesh*> meshes,
-                 std::vector<glm::mat4*> modelToWorldMatrices);
+                 std::vector<glm::mat4> modelToWorldMatrices);
 	
 	/* Getters. */
 	Camera*        getCamera()               {  return &camera;            }

@@ -11,8 +11,9 @@
 #include "Geometry.h"
 #include "Camera.h"
 #include "EventManager.h"
-#include "OrbitalSystem.h"
 #include "OrbitalBody.h"
+#include "OrbitalSystem.h"
+#include "Planet.h"
 
 
 #define  FULLSCREEN_ENABLED   false
@@ -53,10 +54,6 @@ int main(int argc, char* argv[])
 	Geometry::shader = &shader;
 	EventManager eventManager(camera);
 
-	char* sphereObj = "res/body.obj";
-	char* earthTexture = "res/earth.jpg";
-	char* starsTexture = "res/milkyway.jpg";
-	char* sunTexture = "res/preview_sun.jpg";
 
 	glm::vec3  bases[] =
 	{
@@ -65,37 +62,48 @@ int main(int argc, char* argv[])
         {+0.0f, +0.0f, +1.0f}
     };
 
-	/* Create the geometries. */
-	OrbitalSystem system;
-	Mesh stars = Geometry::loadObj(sphereObj, starsTexture);
-	Mesh earth = Geometry::loadObj(sphereObj, earthTexture);
-	Mesh sun   = Geometry::loadObj(sphereObj, sunTexture);
+	char*    sphereObj    =        "res/body.obj";
+	char*    earthTexture =       "res/earth.jpg";
+	char*    starsTexture =    "res/milkyway.jpg";
+	char*    sunTexture   = "res/preview_sun.jpg";
+	char*    sunName      =                 "Sun";
+	char*    earthName    =               "Earth";
+	GLfloat  timer        =           +      0.0f;
+	GLfloat  dif          =           +      0.0f;
+	GLfloat  rot          =           +      0.0f;
+	GLfloat  sunToEarth   =           +    500.0f;
+	GLfloat  stars_scale  =           +  10000.0f;
+	GLfloat  sun_scale    =           +     50.0f;
+	GLfloat  speed        =           +    0.050f;
+	GLfloat  fps          =           +    100.0f;
+	GLfloat  sunMass      =           +   1000.0f;
+	GLfloat  sunRadius    =           +     50.0f;
+	GLfloat  earthMass    =           +      1.0f;
+	GLfloat  earthRadius  =           +      1.0f;
 
-	/* Add geometries to the list of meshes. */
-	std::vector<Mesh*> meshes;
-	meshes.push_back(&stars);
-	meshes.push_back(&earth);
-	meshes.push_back(&sun);
-
-	/* Create transformation matrices. */
-	std::vector<glm::mat4*> modelToWorldMatrices;
-
-	GLfloat    timer               = +      0.0f;
-	GLfloat    dif                 = +      0.0f;
-	GLfloat    rot                 = +      0.0f;
-	GLfloat    radius              = +    500.0f;
-	GLfloat    stars_scale         = +  10000.0f;
-	GLfloat    sun_scale           = +     50.0f;
-	GLfloat    speed               = +    0.050f;
-	GLfloat    fps                 = +    100.0f;
 	glm::vec3  initialPositions[]  = 
 	{ 
-		{ +0.0f, +0.0f, +0.0f }, // Earth 
-		{ +0.0f, +0.0f, +0.0f }, // Sun
-	};	 
+		{ +     0.0f, +0.0f, +0.0f }, // Sun 
+		{ sunToEarth, +0.0f, +0.0f }, // Earth
+	};	
 
-	camera->setPosition({radius + 5.0f, 1.0f, +0.0f});
-	camera->setViewDirection({radius + 4.0f, 0.0f, +0.0f});
+	/* Create the geometries. */
+	OrbitalSystem system;
+	Planet sun(sunName, sunMass, sunRadius, sphereObj, sunTexture, initialPositions[0]);
+	Planet earth(earthName, earthMass, earthRadius, sphereObj, earthTexture, initialPositions[1]);
+	earth.setRotationalAxis({-1.0f / sinf(23.5), +1.0f, +0.0f});
+	earth.setAngularVelocity(0.004166);
+	system.addBody(&sun);
+	system.addBody(&earth);
+
+	camera->setPosition({sunToEarth + 5.0f, 1.0f, +0.0f});
+	camera->setViewDirection({sunToEarth + 4.0f, 0.0f, +0.0f});
+
+	std::vector<Mesh*>     meshes;
+	std::vector<glm::mat4> transformations;
+
+	for(std::string n : *(system.getNames()))
+		meshes.push_back(system.getBody(n)->getGeometry());
 
 	/* Main loop. */	
 	SDL_Event event;
@@ -106,6 +114,7 @@ int main(int argc, char* argv[])
 	while (event.type != SDL_QUIT)
 	{
 		t2 = SDL_GetTicks();
+		system.interpolate((t2 - t1) / 1000);
 
 		/* Handle the event. */
 		eventManager.handleSDLEvent(&event);
@@ -113,25 +122,11 @@ int main(int argc, char* argv[])
 		if ((t2 - t1) >= ((1 / fps) * 1000))
 		{
 			t1 = t2;
-			rot = 360 * (timer / DEGREES_PER_DAY);
 
-			/* Stars */
-			modelToWorldMatrices.push_back( 
-				  &glm::scale(glm::vec3(stars_scale, stars_scale, stars_scale))
-			);
+			for(std::string n : *(system.getNames()))
+				transformations.push_back(system.getBody(n)->snapshotMatrix());
 
-			/* Earth */
-			modelToWorldMatrices.push_back(
-				&(glm::translate(initialPositions[0] + (bases[0] * radius * cosf(timer)) + (bases[2] * radius * sinf(timer))) *
-				  glm::rotate(-rot, glm::vec3(0.0f, 1.0f, 0.0f)))
-			);
-
-			/* Sun */
-			modelToWorldMatrices.push_back(
-				&(glm::scale(glm::vec3(sun_scale, sun_scale, sun_scale)))
-			);
-
-			display.repaint(meshes, modelToWorldMatrices);
+			display.repaint(meshes, transformations);
 			timer += DEGREES_PER_MINUTE * speed;
 		}
 		SDL_PollEvent(&event);

@@ -207,7 +207,7 @@ public:
 	static Mesh      makePlane(glm::vec3  x, 
                                glm::vec3  y);
 	/* Load from .obj file. */
-	static Mesh      loadObj(const char* objFile, 
+	static Mesh*     loadObj(const char* objFile, 
                              const char* textFile = NULL);
 	/* Coordinate Plane. */
 	static Mesh      makeCoordinatePlane(GLint  xWidth, 

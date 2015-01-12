@@ -133,7 +133,7 @@ void Display::updateViewport()
 *                                                                             *
 *******************************************************************************/
 void Display::repaint(std::vector<Mesh*> meshes,
-                      std::vector<glm::mat4*> modelToWorldMatrices)
+                      std::vector<glm::mat4> modelToWorldMatrices)
 {
 	/* Tell OpenGL to clear the color buffer and depth buffer. */
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);	
@@ -148,7 +148,7 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		modelToProjectionMatrix = 
 			viewToProjectionMatrix *           // View  -> Proj.
             camera.getWorldToViewMatrix() *	   // World -> View 
-            (*modelToWorldMatrices.at(i));     // Model -> World
+            modelToWorldMatrices.at(i);     // Model -> World
 
 		/* Bind the appropriate vertex array. */
 		glBindVertexArray(meshes.at(i)->getVertexArrayID());

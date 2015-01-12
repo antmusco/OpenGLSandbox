@@ -60,7 +60,7 @@ void OrbitalSystem::calculateForces()
 		gravitySum = {0.0f, 0.0f, 0.0f};
 
 		/* Calculate attraction to all bodies. */
-		for(int j = 0; i < names.size(); j++)
+		for(int j = 0; j < names.size(); j++)
 		{
 			/* Skip calculation for same body. */
 			if( i == j) continue;
