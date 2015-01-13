@@ -10,6 +10,8 @@
 #include  "Geometry.h"
 #include  "glm\glm.hpp"
 #include  "glm\gtc\matrix_transform.hpp"
+#include  "glm\gtx\vector_angle.hpp"
+#include  <iostream>
 
 /******************************************************************************
 *                                                                             *
@@ -17,7 +19,8 @@
 *                                                                             *
 ******************************************************************************/
 #define   DEGREES_PER_REV    360
-#define   DEFAULT_ROT_AXIS   {+0.0f, +1.0f, +0.0f}
+#define   DEFAULT_ROT_AXIS   glm::vec3(+0.0f, +1.0f, +0.0f)
+#define   RAD_TO_DEG         (180 / M_PI)
 
 /******************************************************************************
  *																			  *
@@ -58,6 +61,8 @@
  *          change in acceleration in world space.                            *
  *  rotationalAxis                                                            *
  *          Vector representing the axis of rotation for the body.            *
+ *  rotationalAngle                                                           *
+ *          Angle of inclination from the default rotational angle.           *
  *  angularPosition                                                           *
  *          DEGREES                                                           *
  *          Number of degrees (0 - 360) the body has rotated.                 *
@@ -99,29 +104,43 @@ public:
 		gravityVector(0), 
 		linearPosition(0), 
 		linearVelocity(0),
+		linearAccel(0),
 		linearThrust(0),  
 		rotationalAxis(DEFAULT_ROT_AXIS),
 		angularPosition(0),
 		angularVelocity(0),
+		angularAccel(0),
 		angularThrust(0), 
-		transformationMatrix(0) {}
+		transMatrix(0) {}
 
 	/************************************************************************** 
 	 *  Calculate the current transformation matrix based upon the object's   *
 	 *  linear and angular position.                                          *
 	 *************************************************************************/
-	glm::mat4 snapshotMatrix()           
+	void snapshotMatrix()           
 	{
 		/* Scale the body. */
-		glm::mat4 scaleMatrix         = glm::scale(glm::mat4(), 
-                                                   scale);
-		/* Translate the body. */
-		glm::mat4 transMatrix         = glm::translate(scaleMatrix, 
-                                                       linearPosition);
+		glm::mat4 scaleM          = glm::scale(glm::mat4(), 
+                                               scale);
 		/* Rotate the body. */
-		return transformationMatrix   = glm::rotate(transMatrix, 
-                                                    angularPosition,
-                                                    rotationalAxis);
+		glm::mat4 rotM;
+		
+		glm::vec3 cross = glm::cross(DEFAULT_ROT_AXIS, rotationalAxis);
+		std::cout << "{" << cross.x << ", " << cross.y << ", " << cross.z << "}" << std::endl;
+
+		/* Rotate to angle of inclination. */
+		if(rotationalAxis != DEFAULT_ROT_AXIS)
+			rotM                  = glm::rotate(rotationalAngle,
+												glm::cross(rotationalAxis, 
+												DEFAULT_ROT_AXIS));
+		
+		rotM                      = glm::rotate(rotM, 
+                                                angularPosition,
+                                                DEFAULT_ROT_AXIS);	       
+		/* Translate the body. */
+		glm::mat4 tranM           = glm::translate(glm::mat4(), 
+                                                   linearPosition);
+		transMatrix   = tranM * rotM * scaleM ;
 	}
 
 	/************************************************************************** 
@@ -137,11 +156,15 @@ public:
 		linearAccel     += dt * (linearThrust / mass);
 		linearVelocity  += dt * linearAccel + (gravityVector / mass);
 		linearPosition  += dt * linearVelocity;
+		if(name == "Earth")
+			std::cout << "{" << gravityVector.x << ", " << gravityVector.y << ", " << gravityVector.z << "}"  << std::endl;
 
 		/* Rotational parameters. */
 		angularAccel    += dt * (angularThrust / mass);
 		angularVelocity += dt * angularAccel;
 		angularPosition += dt * angularVelocity;
+
+
 
 		/* Account for full revolution. */
 		if(angularPosition > DEGREES_PER_REV) 
@@ -164,6 +187,7 @@ public:
 	GLfloat        getAngularVelocity() const     {  return angularVelocity; }
 	GLfloat        getAngularAccel()    const     {  return angularAccel;    }
 	GLfloat        getAngularThrust()   const     {  return angularThrust;   }
+	glm::mat4*     getTransformation()            {  return &transMatrix;    }
 												  
 	/* Setters. */			
 	void           setName(std::string n)         {  name              = n;  }
@@ -176,7 +200,12 @@ public:
 	void           setLinearVelocity(glm::vec3 v) {  linearVelocity    = v;  }
 	void           setLinearAccel(glm::vec3 a)    {  linearAccel       = a;  }
 	void           setLinearThrust(glm::vec3 t)   {  linearThrust      = t;  }
-	void           setRotationalAxis(glm::vec3 a) {  rotationalAxis    = a;  }
+	void           setRotationalAxis(glm::vec3 a) 
+	{  
+		rotationalAxis = a / glm::length(a);
+		rotationalAngle = glm::angle(DEFAULT_ROT_AXIS, rotationalAxis) *
+                          RAD_TO_DEG;
+	}
 	void           setAngularPosition(GLfloat p)  {  angularPosition   = p;  }
 	void           setAngularVelocity(GLfloat v)  {  angularVelocity   = v;  }
 	void           setAngularAccel(GLfloat a)     {  angularAccel      = a;  }
@@ -206,6 +235,8 @@ protected:
 	glm::vec3      linearAccel;
 	/* Axis of rotation of the body. */
 	glm::vec3      rotationalAxis; 
+	/* Angle offset from the default axis of rotation. */
+	GLfloat        rotationalAngle;
 	/* Angular offset of the body. */
 	GLfloat        angularPosition;
 	/* Angular velocity of the body in RADIANS PER SECOND. */
@@ -216,7 +247,7 @@ protected:
 	GLfloat        angularThrust;
 
 	/* Mesh transformation data. */
-	glm::mat4      transformationMatrix;
+	glm::mat4      transMatrix;
 
 };
 

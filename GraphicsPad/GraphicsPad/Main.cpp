@@ -15,8 +15,7 @@
 #include "OrbitalSystem.h"
 #include "Planet.h"
 
-
-#define  FULLSCREEN_ENABLED   false
+#define  FULLSCREEN_ENABLED   true
 #define  DEFAULT_HEIGHT		  600
 #define  DEFAULT_WIDTH        800
 #define  DIMENSION_HEIGHT     0x0
@@ -54,7 +53,6 @@ int main(int argc, char* argv[])
 	Geometry::shader = &shader;
 	EventManager eventManager(camera);
 
-
 	glm::vec3  bases[] =
 	{
         {+1.0f, +0.0f, +0.0f},
@@ -68,18 +66,15 @@ int main(int argc, char* argv[])
 	char*    sunTexture   = "res/preview_sun.jpg";
 	char*    sunName      =                 "Sun";
 	char*    earthName    =               "Earth";
-	GLfloat  timer        =           +      0.0f;
-	GLfloat  dif          =           +      0.0f;
-	GLfloat  rot          =           +      0.0f;
-	GLfloat  sunToEarth   =           +    500.0f;
-	GLfloat  stars_scale  =           +  10000.0f;
-	GLfloat  sun_scale    =           +     50.0f;
-	GLfloat  speed        =           +    0.050f;
-	GLfloat  fps          =           +    100.0f;
-	GLfloat  sunMass      =           +   1000.0f;
-	GLfloat  sunRadius    =           +     50.0f;
-	GLfloat  earthMass    =           +      1.0f;
-	GLfloat  earthRadius  =           +      1.0f;
+	GLfloat  sunToEarth   =          + 1.000e+02f;
+	GLfloat  stars_scale  =          + 1.000e+05f;
+	GLfloat  sun_scale    =          + 6.958e+01f;
+	GLfloat  speed        =          +    20.000f;
+	GLfloat  fps          =          +      50.0f;
+	GLfloat  sunMass      =          + 1.989e+21f;
+	GLfloat  sunRadius    =          +      50.0f;
+	GLfloat  earthMass    =          + 5.972e+15f;
+	GLfloat  earthRadius  =          + 1.000e+01f;
 
 	glm::vec3  initialPositions[]  = 
 	{ 
@@ -91,19 +86,15 @@ int main(int argc, char* argv[])
 	OrbitalSystem system;
 	Planet sun(sunName, sunMass, sunRadius, sphereObj, sunTexture, initialPositions[0]);
 	Planet earth(earthName, earthMass, earthRadius, sphereObj, earthTexture, initialPositions[1]);
-	earth.setRotationalAxis({-1.0f / sinf(23.5), +1.0f, +0.0f});
-	earth.setAngularVelocity(0.004166);
+	earth.setRotationalAxis({-0.91706f, -0.39875f, +0.0f});
+	earth.setAngularVelocity(0.004166f);
+	GLfloat vel = sqrt(G * sunMass / sunToEarth);
+	earth.setLinearVelocity({+0.0f, +0.0f, vel});
 	system.addBody(&sun);
 	system.addBody(&earth);
 
-	camera->setPosition({sunToEarth + 5.0f, 1.0f, +0.0f});
-	camera->setViewDirection({sunToEarth + 4.0f, 0.0f, +0.0f});
-
-	std::vector<Mesh*>     meshes;
-	std::vector<glm::mat4> transformations;
-
-	for(std::string n : *(system.getNames()))
-		meshes.push_back(system.getBody(n)->getGeometry());
+	camera->setPosition({+0.0f, +0.0f, sunToEarth + 5.0f});
+	camera->setViewDirection({+0.0f, +0.0f, sunToEarth});
 
 	/* Main loop. */	
 	SDL_Event event;
@@ -111,31 +102,29 @@ int main(int argc, char* argv[])
 
 	GLuint start, t1, t2;
 	t1 = start = SDL_GetTicks();
+
 	while (event.type != SDL_QUIT)
 	{
-		t2 = SDL_GetTicks();
-		system.interpolate((t2 - t1) / 1000);
-
 		/* Handle the event. */
 		eventManager.handleSDLEvent(&event);
 
+		t2 = SDL_GetTicks();
+
 		if ((t2 - t1) >= ((1 / fps) * 1000))
 		{
+			system.interpolate((speed * (t2 - t1)) / 1000);
+
+			display.repaint(system.getMeshes(),
+							system.getTransforms());
+			
 			t1 = t2;
-
-			for(std::string n : *(system.getNames()))
-				transformations.push_back(system.getBody(n)->snapshotMatrix());
-
-			display.repaint(meshes, transformations);
-			timer += DEGREES_PER_MINUTE * speed;
 		}
+
 		SDL_PollEvent(&event);
 	}
 
 	/* Free the shapes. */
-	int size = meshes.size();
-	for(int i = 0; i < size; i ++)
-		meshes.at(i)->cleanUp();
+	system.cleanUp();
 
 	/* Quit using SDL. */
 	SDL_Quit();

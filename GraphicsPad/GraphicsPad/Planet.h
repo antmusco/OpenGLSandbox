@@ -18,7 +18,7 @@ public:
 		this->name     = std::string(name);
 		this->mass     = mass;
 		this->radius   = radius;
-		this->scale    = glm::vec3() * radius;
+		this->scale    = glm::vec3(1.0f) * radius;
 		this->linearPosition = initialPosition;
 	}
 

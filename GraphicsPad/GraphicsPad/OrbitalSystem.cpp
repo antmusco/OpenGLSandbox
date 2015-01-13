@@ -1,10 +1,11 @@
 #include "OrbitalSystem.h"
 
-
 void OrbitalSystem::addBody(OrbitalBody* body)
 {
 	/* Add the name of the body to the list of keys. */
 	names.push_back(body->getName());
+	meshes.push_back(body->getGeometry());
+	transforms.push_back(body->getTransformation());
 	/* Add the reference to the list of bodies. */
 	bodies[body->getName()] = body;
 }
@@ -32,18 +33,21 @@ void OrbitalSystem::interpolate(GLfloat realSeconds)
 		                  SIM_HOURS_PER_REAL_SECOND * 
 						  SECONDS_PER_HOUR;
 
-	int steps     = (int) (gameSeconds / MIN_SECONDS);
-	int remainder = gameSeconds - (steps * MIN_SECONDS);
+	int steps     = (int) (gameSeconds / MAX_DELTA_T);
+	int remainder = (int) gameSeconds - (steps * MAX_DELTA_T);
 
 	for(int i = 0; i < steps; i++)
 	{
 		calculateForces();
 		for(std::string n : names) 
-			bodies[n]->increment(MIN_SECONDS);
+			bodies[n]->increment(MAX_DELTA_T);
 	}
 	calculateForces();
-	for(std::string n : names)
+	for(std::string n : names) 
+	{
 		bodies[n]->increment(remainder);
+		bodies[n]->snapshotMatrix();	
+	}
 }
 
 void OrbitalSystem::calculateForces()
@@ -52,7 +56,7 @@ void OrbitalSystem::calculateForces()
 	OrbitalBody* currentBody = NULL;
 	OrbitalBody* testBody    = NULL;
 	glm::vec3    gravitySum;
-
+	
 	for(int i = 0; i < names.size(); i++)
 	{
 		/* Get the next body and reset the gravity sum. */
@@ -74,14 +78,20 @@ void OrbitalSystem::calculateForces()
 
 			/* Get the magnitude of the displacement vector. */
 			GLfloat radius = glm::length(dis);
-
+			dis /= radius;
 		    /* F_g = G * m_1 * m_2 / r^2 */
 			/* Instead of normalizing, divide by radius cubed. */
 			gravitySum += dis * (G * currentBody->getMass() * testBody->getMass()) /
-				pow(radius, 3);
+				(radius * radius);
 		}
 
 		/* Set new gravity vector; */
 		currentBody->setGravityVector(gravitySum);
 	}
+}
+
+void OrbitalSystem::cleanUp() 
+{
+	for(std::string n : names)
+		bodies[n]->getGeometry()->cleanUp();
 }
