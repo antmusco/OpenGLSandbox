@@ -1,6 +1,7 @@
 #pragma once
 #include  "Camera.h"
 #include  "SDL\SDL.h"
+#include  <GL\glew.h>
 
 /******************************************************************************
  *																			  *
@@ -22,7 +23,7 @@ class EventManager
 public:
 
 	/* Constructor. */
-	EventManager(Camera* camera);
+	EventManager(Camera* camera, GLfloat* speed);
 
 	/* Handle an SDL Event. */
 	void           handleSDLEvent(SDL_Event* event);
@@ -42,5 +43,6 @@ public:
 private:
 	/* Camera for the application. */
 	Camera*        camera;
+	GLfloat*        speed;
 };
 

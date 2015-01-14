@@ -1,5 +1,6 @@
 #include "EventManager.h"
 #include "glm\glm.hpp"
+#include "GL\glew.h"
 
 /******************************************************************************
 *                                                                             *
@@ -20,9 +21,10 @@
 *  camera used by this event manager.                                         *
 *                                                                             *
 *******************************************************************************/
-EventManager::EventManager(Camera* camera)
+EventManager::EventManager(Camera* camera, GLfloat* speed)
 {
 	this->camera = camera;
+	this->speed = speed;
 }
 
 /******************************************************************************
@@ -78,10 +80,22 @@ void EventManager::handleSDLEvent(SDL_Event* event)
 void EventManager::handleKeyPress(SDL_Scancode key) 
 {	
 	glm::vec3 move;
-	float scale = 2.0f;
+	float scale = 1.0f;
 
 	switch (key) 
 	{
+	/* Speed Up. */
+	case SDL_SCANCODE_T:
+		if(*speed < 4.0f)
+			*speed += 0.5f;
+		break;
+	
+	/* Slow Down. */
+	case SDL_SCANCODE_R:
+		if(*speed < 0.0f)
+			*speed -= 0.5f;
+		break;
+
 	/* Strafe Right. */
 	case SDL_SCANCODE_D:
 	case SDL_SCANCODE_RIGHT:

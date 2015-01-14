@@ -24,6 +24,9 @@
 #define  DEGREES_PER_HOUR     4.109589e-2f
 #define  DEGREES_PER_MINUTE   6.849315e-4f
 
+
+GLfloat speed = + 1.000f;
+
 GLushort getScreenDimension(int dim) 
 {
 	SDL_Rect display;
@@ -51,7 +54,7 @@ int main(int argc, char* argv[])
 	display.setShader(shader);
 	Camera* camera = display.getCamera();
 	Geometry::shader = &shader;
-	EventManager eventManager(camera);
+	EventManager eventManager(camera, &speed);
 
 	glm::vec3  bases[] =
 	{
@@ -69,7 +72,6 @@ int main(int argc, char* argv[])
 	GLfloat  sunToEarth   =          + 1.000e+02f;
 	GLfloat  stars_scale  =          + 1.000e+05f;
 	GLfloat  sun_scale    =          + 6.958e+01f;
-	GLfloat  speed        =          +    20.000f;
 	GLfloat  fps          =          +      50.0f;
 	GLfloat  sunMass      =          + 1.989e+21f;
 	GLfloat  sunRadius    =          +      50.0f;
@@ -93,9 +95,6 @@ int main(int argc, char* argv[])
 	system.addBody(&sun);
 	system.addBody(&earth);
 
-	camera->setPosition({+0.0f, +0.0f, sunToEarth + 5.0f});
-	camera->setViewDirection({+0.0f, +0.0f, sunToEarth});
-
 	/* Main loop. */	
 	SDL_Event event;
 	SDL_PollEvent(&event);
@@ -113,13 +112,11 @@ int main(int argc, char* argv[])
 		if ((t2 - t1) >= ((1 / fps) * 1000))
 		{
 			system.interpolate((speed * (t2 - t1)) / 1000);
-
-			display.repaint(system.getMeshes(),
-							system.getTransforms());
 			
 			t1 = t2;
-		}
 
+			display.repaint(system.getMeshes(), system.getTransforms());
+		}
 		SDL_PollEvent(&event);
 	}
 

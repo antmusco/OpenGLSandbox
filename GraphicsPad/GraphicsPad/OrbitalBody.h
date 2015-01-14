@@ -111,7 +111,7 @@ public:
 		angularVelocity(0),
 		angularAccel(0),
 		angularThrust(0), 
-		transMatrix(0) {}
+		transMatrix(0)                            {}
 
 	/************************************************************************** 
 	 *  Calculate the current transformation matrix based upon the object's   *
@@ -211,6 +211,9 @@ public:
 	void           setAngularAccel(GLfloat a)     {  angularAccel      = a;  }
 	void           setAngularThrust(GLfloat t)    {  angularThrust     = t;  }
 
+	/* Destructor. */
+	~OrbitalBody()                                {                          }
+
 /* Protected Members. */
 protected:
 	/* Name of the body. */
@@ -248,6 +251,52 @@ protected:
 
 	/* Mesh transformation data. */
 	glm::mat4      transMatrix;
+	Mesh*          trail;
 
 };
 
+class Trail : public Mesh
+{
+public:
+
+	const GLuint MAX_VERTICES = 50;
+
+	Trail() : front(nullptr), back(nullptr) 
+	{
+		Vertex   v[50];
+		GLushort i[50];
+		setVertices(MAX_VERTICES, v);
+		setIndices(MAX_VERTICES, i);
+	}
+
+	const glm::vec3 color   = {+1.0f, +1.0f, +1.0f};
+	const glm::vec2 texture = {+0.0f, +0.0f};
+	void addPoint(glm::vec3 p) 
+	{
+		Vertex v{p, color, texture};
+
+		/* Empty queue. */
+		if(back == nullptr) 
+		{
+			
+		}
+		/* Queue with one elenment. */
+		else if(front == back)
+		{
+
+		} 
+		/* Submaximal queue. */
+		else if(getNumVertices() < 50)
+		{
+
+		}
+		/* Maximal queue. */
+		else 
+		{
+
+		}
+	}
+private:
+	Vertex*  front;
+	Vertex*  back;
+};

@@ -158,7 +158,7 @@ public:
 	/* Destructor */ 
 	void           cleanUp();
 
-private:
+protected:
 	/* Vertex Data */
 	Vertex*        vertices;
 	GLuint         numVertices;

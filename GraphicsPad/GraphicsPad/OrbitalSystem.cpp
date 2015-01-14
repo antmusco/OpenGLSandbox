@@ -2,96 +2,108 @@
 
 void OrbitalSystem::addBody(OrbitalBody* body)
 {
-	/* Add the name of the body to the list of keys. */
-	names.push_back(body->getName());
+	/* Add the pointer, mesh, and transformation. */
+	bodies.push_back(body);
 	meshes.push_back(body->getGeometry());
 	transforms.push_back(body->getTransformation());
-	/* Add the reference to the list of bodies. */
-	bodies[body->getName()] = body;
 }
 
-void OrbitalSystem::removeBody(std::string name)
+void OrbitalSystem::removeBody(const GLuint i)
 {
-	/* Find the index of the name. */
-	int i;
-	for(i = 0; i < names.size(); i++)
-		if(names.at(i) == name)
-			break;
+	bodies.erase(bodies.begin() + i);
+}
 
-	/* If the index was found, erase it from the map list. */
-	if( i < names.size()) 
+
+glm::vec3 OrbitalSystem::gravityVector(OrbitalBody* subject, glm::vec3 position)
+{
+	glm::vec3 netGravity(0);
+	glm::vec3 direction(0);
+
+	/* Calculate attraction to all bodies. */
+	for(OrbitalBody* body : bodies)
 	{
-		bodies[name] = NULL;
-		names.erase(names.begin() + i);
+		/* Do not compare subject with itself. */
+		if(body == subject)
+			continue;
+
+		/* Get the displacement vector. */
+		direction = body->getLinearPosition() - position;
+
+		/* Get the magnitude of the displacement vector. */
+		GLfloat radius = glm::length(direction);
+		direction /= radius;
+		
+		/* Get the magnitude of the force of gravity. *
+		 *  -> magnitude = G * m / r^2                */
+		GLfloat magnitude = (G * body->getMass()) / (radius * radius);
+		
+		/* Calculate gravity and apply to body. */
+		netGravity += magnitude * direction;
 	}
+	/* Return gravity vector */
+	return netGravity;
+}
+
+
+glm::vec3 OrbitalSystem::A(OrbitalBody* subject, const glm::vec3 position, float dt)
+{
+	/* Calculate the force of gravity the the body's new position. */
+	glm::vec3 netAcceleration = gravityVector(subject, position);
+	/* Account for thrust and return net Acceleration. */
+	return netAcceleration;
+	//return netAcceleration += dt * subject->getLinearThrust();
+}
+
+void OrbitalSystem::rungeKattaApprx(OrbitalBody* subject, const GLfloat dt)
+{
+	const GLuint  order      = 4;
+	const GLfloat c          = 1.0f / 6.0f;
+	glm::vec3     k[order];
+	glm::vec3     l[order];
+	glm::vec3     r          = subject->getLinearPosition();
+	glm::vec3     v          = subject->getLinearVelocity();
+	glm::vec3     a          = subject->getLinearAccel();
+			     	  
+	k[0]  = dt * v;
+	l[0]  = dt * a;
+	k[1]  = dt * (v + (l[0] / 2.0f));
+	l[1]  = dt * A(subject, r + (k[0] / 2.0f), (dt / 2.0f));
+	k[2]  = dt * (v + (l[1] / 2.0f));
+	l[2]  = dt * A(subject, r + (k[1] / 2.0f), (dt / 2.0f));
+	k[3]  = dt * (v + l[2]);
+	l[3]  = dt * A(subject, r + k[2], dt);
+
+	r += c * (k[0] + k[1] + k[2] + k[3]);
+	v += c * (l[0] + l[1] + l[2] + l[3]);
+
+	subject->setLinearPosition(r);
+	subject->setLinearVelocity(v);
+	subject->setGravityVector(gravityVector(subject, r));
+	subject->snapshotMatrix();
 }
 
 /* Delta t is in real-time seconds. */
 void OrbitalSystem::interpolate(GLfloat realSeconds)
 {
-	GLfloat gameSeconds = realSeconds * 
-		                  SIM_HOURS_PER_REAL_SECOND * 
-						  SECONDS_PER_HOUR;
+	/* Convert from real time to game time. */
+	GLuint dt = (GLuint) (realSeconds * SIM_SECONDS_PER_REAL_SECOND);
 
-	int steps     = (int) (gameSeconds / MAX_DELTA_T);
-	int remainder = (int) gameSeconds - (steps * MAX_DELTA_T);
+	/* Add the time to the global clock. */
+	clock += dt;
 
-	for(int i = 0; i < steps; i++)
+	/* Use Runge-Katta approximation to update the state vectors. */
+	for(OrbitalBody* subject : bodies) 
 	{
-		calculateForces();
-		for(std::string n : names) 
-			bodies[n]->increment(MAX_DELTA_T);
+		rungeKattaApprx(subject, dt);	
+		glm::vec3 g = subject->getGravityVector();
+		std::cout << subject->getName() <<" {" << g.x << ", " << g.y << ", " << g.z << "}" << std::endl; 
 	}
-	calculateForces();
-	for(std::string n : names) 
-	{
-		bodies[n]->increment(remainder);
-		bodies[n]->snapshotMatrix();	
-	}
-}
-
-void OrbitalSystem::calculateForces()
-{
-	/* Declare local variables. */
-	OrbitalBody* currentBody = NULL;
-	OrbitalBody* testBody    = NULL;
-	glm::vec3    gravitySum;
 	
-	for(int i = 0; i < names.size(); i++)
-	{
-		/* Get the next body and reset the gravity sum. */
-		currentBody = bodies[names.at(i)];
-		gravitySum = {0.0f, 0.0f, 0.0f};
-
-		/* Calculate attraction to all bodies. */
-		for(int j = 0; j < names.size(); j++)
-		{
-			/* Skip calculation for same body. */
-			if( i == j) continue;
-
-			/* Get the next body to calculate the force. */
-			testBody = bodies[names.at(j)];
-
-			/* Get the displacement vector. */
-			glm::vec3 dis = testBody->getLinearPosition() - 
-				            currentBody->getLinearPosition();
-
-			/* Get the magnitude of the displacement vector. */
-			GLfloat radius = glm::length(dis);
-			dis /= radius;
-		    /* F_g = G * m_1 * m_2 / r^2 */
-			/* Instead of normalizing, divide by radius cubed. */
-			gravitySum += dis * (G * currentBody->getMass() * testBody->getMass()) /
-				(radius * radius);
-		}
-
-		/* Set new gravity vector; */
-		currentBody->setGravityVector(gravitySum);
-	}
 }
 
 void OrbitalSystem::cleanUp() 
 {
-	for(std::string n : names)
-		bodies[n]->getGeometry()->cleanUp();
+	stars->cleanUp();
+	for(OrbitalBody* body : bodies)
+		body->getGeometry()->cleanUp();
 }

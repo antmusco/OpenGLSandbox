@@ -13,7 +13,7 @@
 #include  "OrbitalBody.h"
 #include  "Geometry.h"
 
-#define   SIM_HOURS_PER_REAL_SECOND             0.0025f
+#define   SIM_SECONDS_PER_REAL_SECOND             60.0f
 #define   SECONDS_PER_HOUR                      3600.0f
 #define   MAX_DELTA_T                            100.0f                
 #define   G                                6.67384e-20f
@@ -48,44 +48,55 @@ class OrbitalSystem
 public:
 
 	/* Default constructor. */
-	OrbitalSystem() 
+	OrbitalSystem() : clock(0)
 	{
+		/* Initialize the stars. */
 		stars = Geometry::loadObj(STARS_OBJ, STARS_TEXTURE);
 		meshes.push_back(stars);
 		starsMatrix = glm::scale(glm::mat4(), glm::vec3(STARS_SCALE));
 		transforms.push_back(&starsMatrix);
-
 	}
 
 	/* Add a body to the system. */
-	void                       addBody(OrbitalBody* body);
+	void                      addBody          (      OrbitalBody* body       );
+
+	
 	/* Remove a body from the system given its name. */
-	void                       removeBody(std::string name);
+	void                      removeBody       (const GLuint       i          );
+	
 	/* Update the system by incrementing the time until seconds have passed. */
-	void                       interpolate(GLfloat seconds);
+	void                      interpolate      (const GLfloat      seconds    );
+	
 	/* Calculate the gravitational forces felt by each body. */
-	void                       calculateForces();
-	/* Get the list of body names. */
-	std::vector<std::string>*  getNames()                { return &names;        }
-	/* Get a reference to the body with the given name. */
-	OrbitalBody*               getBody(std::string name) { return bodies[name];  }
+	glm::vec3                 gravityVector    (      OrbitalBody* subject,      
+	                                                  glm::vec3    position  );
+
+
+	glm::vec3                 A                (      OrbitalBody* subject, 
+	                                            const glm::vec3    position, 
+	                                            const GLfloat      dt         );
+	
+	/* Approximation of the change in variables using Runge-Katta method. */
+	void                      rungeKattaApprx  (      OrbitalBody* subject, 
+	                                            const GLfloat      t          );
+
 	/* Remove all of the allocated space. */
-	void                       cleanUp();
+	void                      cleanUp();
 
 	/* Getters. */
-	std::vector<Mesh*>         getMeshes()      const    {  return meshes;       }
-	std::vector<glm::mat4*>    getTransforms()  const    {  return transforms;   }
+	GLuint                    t()               const  {  return clock;        }
+	OrbitalBody*              getBody(GLuint i)        {  return bodies.at(i); }
+	std::vector<Mesh*>        getMeshes()       const  {  return meshes;       }
+	std::vector<glm::mat4*>   getTransforms()   const  {  return transforms;   }
 
 private:
 	
 	/* Collection of orbital bodies in this system. */
-	std::map<std::string,
-		     OrbitalBody*>    bodies;
-	/* Collection of names for the orbital bodies in this system.*/
-	std::vector<std::string>  names;
+	GLuint                    clock;
+	std::vector<OrbitalBody*> bodies;
 	Mesh*                     stars;
+	glm::mat4                 starsMatrix;
 	std::vector<Mesh*>        meshes;
 	std::vector<glm::mat4*>   transforms;
-	glm::mat4                 starsMatrix;
 };
 
