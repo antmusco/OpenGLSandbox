@@ -105,8 +105,11 @@
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shader.fs" />
-    <None Include="res\shader.vs" />
+    <None Include="res\shaders\shader.fs" />
+    <None Include="res\shaders\shader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="res\data\system.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

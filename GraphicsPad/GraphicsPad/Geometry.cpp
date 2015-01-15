@@ -48,6 +48,21 @@ Mesh::Mesh() :
       textureID(-1),
       numBuffers(DEFAULT_NUM_BUFFERS), bufferIDs(0), vertexArrayID(0),
       drawMode(DEFAULT_DRAW_MODE) {}
+Mesh::Mesh(const Mesh& rhs) :
+	  numVertices(rhs.getNumVertices()),
+	  numIndices(rhs.getNumIndices()),
+	  textureID(rhs.getTextureID()),
+	  numBuffers(rhs.getNumBuffers()),
+	  vertexArrayID(rhs.getVertexArrayID()),
+	  drawMode(rhs.getDrawMode())
+{
+	vertices = new Vertex[rhs.getNumVertices()];
+	indices  = new GLushort[rhs.getNumIndices()];
+	memcpy(vertices, rhs.getVertices(), rhs.getNumVertices() * sizeof(Vertex));
+	memcpy(indices, rhs.getIndices(), rhs.getNumIndices() * sizeof(GLushort));
+	bufferIDs = new GLuint[rhs.getNumBuffers()];
+	memcpy(bufferIDs, rhs.getBufferIDs(), rhs.getNumBuffers() * sizeof(GLuint));
+}
 
 /******************************************************************************
 *                                                                             *
@@ -889,6 +904,7 @@ GLushort Geometry::getMiddlePoint(GLushort i1, GLushort i2,
 
 void Mesh::genTextureID(const char* filename)
 {
+
 	/* Enable Texture 2D. */
 	glEnable(GL_TEXTURE_2D);
 
@@ -896,7 +912,7 @@ void Mesh::genTextureID(const char* filename)
 	if(filename != NULL) 
 	{
 		/* Load the SDL_Surface from the file. */
-		textureSurface = IMG_Load(filename);
+		SDL_Surface* textureSurface = IMG_Load(filename);
 		/* The default color scheme is RGB. */
 		GLenum colorScheme = GL_RGB;
 

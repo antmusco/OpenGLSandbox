@@ -7,19 +7,22 @@
 class Planet : public OrbitalBody
 {
 public:
-	Planet(char* name, 
-           GLfloat     mass, 
-           GLfloat     radius, 
-		   char* objFile,
-		   char* textFile,
-           glm::vec3   initialPosition) 
+	Planet(const char* name, 
+           const GLfloat     mass, 
+           const GLfloat     radius, 
+		   const char* objFile,
+		   const char* textFile,
+           const glm::vec3   initialPosition,
+		   const glm::vec3   initialVelocity) 
 	{
-		this->geometry = Geometry::loadObj(objFile, textFile);
-		this->name     = std::string(name);
-		this->mass     = mass;
-		this->radius   = radius;
-		this->scale    = glm::vec3(1.0f) * radius;
+		this->geometry       = Geometry::loadObj(objFile, textFile);
+		this->name           = std::string(name);
+		this->mass           = mass;
+		this->radius         = radius;
+		this->scale          = glm::vec3(1.0f) * radius;
 		this->linearPosition = initialPosition;
+		this->linearVelocity = initialVelocity;
+
 	}
 
 	~Planet() {}

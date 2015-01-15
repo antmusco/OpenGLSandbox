@@ -107,6 +107,7 @@ public:
 		linearAccel(0),
 		linearThrust(0),  
 		rotationalAxis(DEFAULT_ROT_AXIS),
+		rotationalAngle(0),
 		angularPosition(0),
 		angularVelocity(0),
 		angularAccel(0),
@@ -126,7 +127,7 @@ public:
 		glm::mat4 rotM;
 		
 		glm::vec3 cross = glm::cross(DEFAULT_ROT_AXIS, rotationalAxis);
-		std::cout << "{" << cross.x << ", " << cross.y << ", " << cross.z << "}" << std::endl;
+		//std::cout << "{" << cross.x << ", " << cross.y << ", " << cross.z << "}" << std::endl;
 
 		/* Rotate to angle of inclination. */
 		if(rotationalAxis != DEFAULT_ROT_AXIS)
@@ -157,7 +158,7 @@ public:
 		linearVelocity  += dt * linearAccel + (gravityVector / mass);
 		linearPosition  += dt * linearVelocity;
 		if(name == "Earth")
-			std::cout << "{" << gravityVector.x << ", " << gravityVector.y << ", " << gravityVector.z << "}"  << std::endl;
+			//std::cout << "{" << gravityVector.x << ", " << gravityVector.y << ", " << gravityVector.z << "}"  << std::endl;
 
 		/* Rotational parameters. */
 		angularAccel    += dt * (angularThrust / mass);
@@ -260,43 +261,35 @@ class Trail : public Mesh
 public:
 
 	const GLuint MAX_VERTICES = 50;
-
-	Trail() : front(nullptr), back(nullptr) 
-	{
-		Vertex   v[50];
-		GLushort i[50];
-		setVertices(MAX_VERTICES, v);
-		setIndices(MAX_VERTICES, i);
-	}
-
 	const glm::vec3 color   = {+1.0f, +1.0f, +1.0f};
 	const glm::vec2 texture = {+0.0f, +0.0f};
+
+	Trail() : front(-1), back(-1) 
+	{
+		vertices = new Vertex[MAX_VERTICES];
+		indices  = new GLushort[2 * (MAX_VERTICES - 1)];
+	}
+
 	void addPoint(glm::vec3 p) 
 	{
 		Vertex v{p, color, texture};
 
 		/* Empty queue. */
-		if(back == nullptr) 
+		if(back == -1) 
 		{
-			
+			vertices[0] = v;
+			front = back = 0;
 		}
-		/* Queue with one elenment. */
-		else if(front == back)
+		/* Submaximal queue */
+		else
 		{
-
+			back = (back + 1) % MAX_VERTICES;
+			vertices[back] = v;
+			if (front == back)
+				front = (front + 1) % MAX_VERTICES;
 		} 
-		/* Submaximal queue. */
-		else if(getNumVertices() < 50)
-		{
-
-		}
-		/* Maximal queue. */
-		else 
-		{
-
-		}
 	}
 private:
-	Vertex*  front;
-	Vertex*  back;
+	GLint  front;
+	GLint  back;
 };

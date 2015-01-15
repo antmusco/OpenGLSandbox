@@ -22,8 +22,8 @@
 #define  DEFAULT_FAR_PLANE        150000.0f
 
 /* Default vertex and fragment shader source files. */
-#define  DEFAULT_VERTEX_SHADER    "res/shader.vs"
-#define  DEFAULT_FRAGMENT_SHADER  "res/shader.fs"
+#define  DEFAULT_VERTEX_SHADER    "res/shaders/shader.vs"
+#define  DEFAULT_FRAGMENT_SHADER  "res/shaders/shader.fs"
 
 /******************************************************************************
  *																			  *

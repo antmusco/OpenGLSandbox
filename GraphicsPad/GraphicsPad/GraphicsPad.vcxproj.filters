@@ -24,7 +24,10 @@
     <ClInclude Include="Planet.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shader.fs" />
-    <None Include="res\shader.vs" />
+    <None Include="res\shaders\shader.fs" />
+    <None Include="res\shaders\shader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="res\data\system.xml" />
   </ItemGroup>
 </Project>

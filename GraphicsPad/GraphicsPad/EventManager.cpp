@@ -80,7 +80,7 @@ void EventManager::handleSDLEvent(SDL_Event* event)
 void EventManager::handleKeyPress(SDL_Scancode key) 
 {	
 	glm::vec3 move;
-	float scale = 1.0f;
+	float scale = 20.0f;
 
 	switch (key) 
 	{
@@ -102,7 +102,7 @@ void EventManager::handleKeyPress(SDL_Scancode key)
 		move = glm::cross(*(camera->getUpDirection()), *(camera->getViewDirection()));
 		move = move / glm::length(move);
 		*( camera->getPosition() ) += move * scale;
-		//*( camera->getViewDirection() ) += move;
+		*( camera->getViewDirection() ) += move;
 		break;
 
 	/* Strafe Left. */
@@ -111,7 +111,7 @@ void EventManager::handleKeyPress(SDL_Scancode key)
 		move = glm::cross(*( camera->getViewDirection() ), *( camera->getUpDirection() ));
 		move = move / glm::length(move);
 		*( camera->getPosition() ) += move * scale;
-		//*( camera->getViewDirection() ) += move;
+		*( camera->getViewDirection() ) += move;
 		break;
 
 	/* Step Forward. */

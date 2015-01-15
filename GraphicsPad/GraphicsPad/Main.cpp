@@ -23,6 +23,9 @@
 #define  DEGREES_PER_DAY      9.863014e-1f
 #define  DEGREES_PER_HOUR     4.109589e-2f
 #define  DEGREES_PER_MINUTE   6.849315e-4f
+#define  MESHES_PATH          "res/meshes/";
+#define  TEXUTRES_PATH        "res/textures/";
+#define  SHADERS_PATH         "res/shaders/";
 
 
 GLfloat speed = + 1.000f;
@@ -63,20 +66,24 @@ int main(int argc, char* argv[])
         {+0.0f, +0.0f, +1.0f}
     };
 
-	char*    sphereObj    =        "res/body.obj";
-	char*    earthTexture =       "res/earth.jpg";
-	char*    starsTexture =    "res/milkyway.jpg";
-	char*    sunTexture   = "res/preview_sun.jpg";
-	char*    sunName      =                 "Sun";
-	char*    earthName    =               "Earth";
-	GLfloat  sunToEarth   =          + 1.000e+02f;
-	GLfloat  stars_scale  =          + 1.000e+05f;
-	GLfloat  sun_scale    =          + 6.958e+01f;
-	GLfloat  fps          =          +      50.0f;
-	GLfloat  sunMass      =          + 1.989e+21f;
-	GLfloat  sunRadius    =          +      50.0f;
-	GLfloat  earthMass    =          + 5.972e+15f;
-	GLfloat  earthRadius  =          + 1.000e+01f;
+	std::string  sphereObj    = MESHES_PATH;
+	sphereObj.append("body.obj");
+	std::string  earthTexture = TEXUTRES_PATH;
+	earthTexture.append("earth.jpg");
+	std::string  starsTexture = TEXUTRES_PATH;
+	starsTexture.append("milkyway.jpg");
+	std::string  sunTexture   = TEXUTRES_PATH;
+	sunTexture.append("sun.jpg");
+	std::string  sunName      =                          "Sun";
+	std::string  earthName    =                        "Earth";
+	GLfloat      sunToEarth   =                   + 1.000e+02f;
+	GLfloat      stars_scale  =                   + 1.000e+05f;
+	GLfloat      sun_scale    =                   + 6.958e+01f;
+	GLfloat      fps          =                   +      50.0f;
+	GLfloat      sunMass      =                   + 1.989e+21f;
+	GLfloat      sunRadius    =                   +      50.0f;
+	GLfloat      earthMass    =                   + 5.972e+15f;
+	GLfloat      earthRadius  =                   + 1.000e+01f;
 
 	glm::vec3  initialPositions[]  = 
 	{ 
@@ -85,15 +92,8 @@ int main(int argc, char* argv[])
 	};	
 
 	/* Create the geometries. */
-	OrbitalSystem system;
-	Planet sun(sunName, sunMass, sunRadius, sphereObj, sunTexture, initialPositions[0]);
-	Planet earth(earthName, earthMass, earthRadius, sphereObj, earthTexture, initialPositions[1]);
-	earth.setRotationalAxis({-0.91706f, -0.39875f, +0.0f});
-	earth.setAngularVelocity(0.004166f);
-	GLfloat vel = sqrt(G * sunMass / sunToEarth);
-	earth.setLinearVelocity({+0.0f, +0.0f, vel});
-	system.addBody(&sun);
-	system.addBody(&earth);
+	//OrbitalSystem system(sphereObj.c_str(), starsTexture.c_str(), stars_scale);
+	OrbitalSystem system = OrbitalSystem::loadFile("res/data/system.xml");
 
 	/* Main loop. */	
 	SDL_Event event;

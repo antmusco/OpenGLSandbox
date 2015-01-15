@@ -116,6 +116,7 @@ class Mesh
 public:
 	/* Constructor */
 	               Mesh();
+				   Mesh(const Mesh& rhs);
 
 	/* Calculate the number of bytes for the vertices. */
 	GLsizeiptr	   vertexBufferSize()    const;
@@ -166,7 +167,6 @@ protected:
 	GLushort*      indices;
 	GLuint         numIndices;
 	/* Texture Data */
-	SDL_Surface*   textureSurface;
 	GLuint         textureID;
 	/* Buffer Data */
 	GLuint         numBuffers;
