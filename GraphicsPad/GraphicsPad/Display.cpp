@@ -62,15 +62,69 @@ Display::Display(std::string title, GLushort width, GLushort height)
 		std::cerr << "Status: " << glewGetErrorString(status) << std::endl;
 	}
 
-	/* Enable depth buffering. */
-	glEnable(GL_DEPTH_TEST);
-
 	/* Show the version of GLEW currently being used. */
 	fprintf(stdout, "Stats: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 	
 	/* Update the viewport. */
 	updateViewport();
 
+}
+
+/******************************************************************************
+*                                                                             *
+*                        Display::getScreenDimensions                         *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  @param d                                                                   *
+*        Dimension to get (height or width).                                  *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  The value of the number of pixels wide the specified dimension is for the  *
+*  specified display.                                                         *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Function which returns the width or height of the window.                  *
+*                                                                             *
+*******************************************************************************/
+GLushort Display::getScreenDimension(Dimension d) 
+{
+	/* Place the dimensions of the screen in an SDL_Rect struct. */
+	SDL_Rect display;
+	SDL_GetDisplayBounds(0, &display);
+	
+	/* Return the indicated Dimension. */
+	if(d == Dimension::HEIGHT)
+		return display.h;
+	else if(d == Dimension::WIDTH)
+		return display.w;
+	else
+		return -1;
+}
+
+/******************************************************************************
+*                                                                             *
+*                              Display::maximize                              *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Maximizes the SDL Window to the current screen.                            *
+*                                                                             *
+*******************************************************************************/
+void Display::maximize()
+{
+	/* Maximize the window. */
+	SDL_MaximizeWindow(window);
 }
 
 /******************************************************************************
@@ -141,7 +195,9 @@ void Display::repaint(std::vector<Mesh*> meshes,
 	/* Get the window dimensions and update the viewport. */
 	updateViewport();
 
-	/* Display Meshes. */
+	glEnable(GL_DEPTH_TEST);
+
+	/* Draw 3-D space. */
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
 		/* Generate the Model -> Proj. transformation. */
@@ -169,11 +225,32 @@ void Display::repaint(std::vector<Mesh*> meshes,
                        0);                               // Index offset
 
 	}
+	/* Draw 2-D Overlay. */
+
 
 	/* Swap the double buffer. */
 	SDL_GL_SwapWindow(window);
 }
 
+/******************************************************************************
+*                                                                             *
+*                             Display::setShader                              *
+*                                                                             *
+*******************************************************************************
+* PARAMETERS                                                                  *
+*  @param shader                                                              *
+*        The shader object to be used for rendering the geometry.             *
+*                                                                             *
+*******************************************************************************
+* RETURNS                                                                     *
+*  void                                                                       *
+*                                                                             *
+*******************************************************************************
+* DESCRIPTION                                                                 *
+*  Tells OpenGL to use the indicated shader for rendering, and gets the       *
+*  location IDs of the uniform variables inside the shader program.           *
+*                                                                             *
+*******************************************************************************/
 void Display::setShader(Shader shader)
 {
 	/* Tell OpenGL to use this shader. */
@@ -183,9 +260,9 @@ void Display::setShader(Shader shader)
 	modelToProjectionUniformLocation = glGetUniformLocation(
 		shader.getProgram(), "modelToProjectionMatrix");
 
+	/* Get the location of the texture sampler uniform variable. */
 	textureUniformLocation = glGetUniformLocation(
 		shader.getProgram(), "texture");
-	
 }
 
 /******************************************************************************
@@ -215,5 +292,4 @@ Display::~Display()
 
 	/* Destroy the window. */
 	SDL_DestroyWindow(window);
-
 }

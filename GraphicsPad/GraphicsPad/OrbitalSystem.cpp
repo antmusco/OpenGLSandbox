@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Planet.h"
 
+
 OrbitalSystem::OrbitalSystem(const OrbitalSystem& rhs) :
 	  G(rhs.getG()), clock(rhs.t()), starsMatrix(rhs.getStarsMatrix())
 {
