@@ -1,0 +1,114 @@
+#pragma once
+/******************************************************************************
+*                                                                             *
+*                              Included Header Files                          *
+*                                                                             *
+******************************************************************************/
+
+#include  <string>
+#include  <map>
+#include  <vector>
+#include  <glm\glm.hpp>
+#include  <GL\glew.h>
+#include  "OrbitalBody.h"
+#include  "Geometry.h"
+
+#define   SIM_SECONDS_PER_REAL_SECOND             60.0f
+#define   SECONDS_PER_HOUR                      3600.0f
+#define   MAX_DELTA_T                            100.0f                
+#define   DEFAULT_G                        6.67384e-20f
+
+/******************************************************************************
+ *																			  *
+ *                            OrbitalSystem Class                             *
+ *																			  *
+ ******************************************************************************
+ * MEMBERS                                                                    *
+ *  geometry                                                                  *
+ *          Mesh describing the position, color, and texture of the vertices  *
+ *          to be displayed.                                                  *
+ *  radius                                                                    *
+ *          METERS                                                            *
+ *          Bounding distance from the center of the object to its surface.   *
+ *                                                                            *
+ ******************************************************************************
+ * DESCRIPTION                                                                *
+ *  Class representing an Orbital System, which is a collection of orbital    *
+ *  bodies. This system manages the interactions between bodies via gravity   *
+ *  and collisions. This class deines several orbital system constants used   *
+ *  by the orbital bodies to simulate physics.                                *
+ *                                                                            *
+ ******************************************************************************/
+class OrbitalSystem
+{
+/* Public Members. */
+public:
+
+	/* Custom constructor. */
+	OrbitalSystem(const char* objFile,
+		          const char* textureFile,
+				  const GLfloat starsScale) : G(DEFAULT_G), clock(0), scale(1)
+	{
+		/* Initialize the stars. */
+		stars = Geometry::loadObj(objFile, textureFile);
+		meshes.push_back(stars);
+		starsMatrix = glm::scale(glm::mat4(), glm::vec3(starsScale));
+		transforms.push_back(&starsMatrix);
+	}
+
+	OrbitalSystem(const OrbitalSystem& rhs);
+
+	/* Load an orbital system from a file. */
+	static OrbitalSystem      loadFile         (const char*        xmlFile    );
+
+	/* Add a body to the system. */
+	void                      addBody          (      OrbitalBody* body       );
+	
+	/* Remove a body from the system given its name. */
+	void                      removeBody       (const GLuint       i          );
+	
+	/* Update the system by incrementing the time until seconds have passed. */
+	void                      interpolate      (const GLfloat      seconds    );
+	
+	/* Calculate the gravitational forces felt by each body. */
+	glm::vec3                 gravityVector    (      OrbitalBody* subject,      
+	                                                  glm::vec3    position  );
+
+
+	glm::vec3                 A                (      OrbitalBody* subject, 
+	                                            const glm::vec3    position, 
+	                                            const GLfloat      dt         );
+	
+	/* Approximation of the change in variables using Runge-Katta method. */
+	void                      rungeKattaApprx  (      OrbitalBody* subject, 
+	                                            const GLfloat      t          );
+
+	/* Remove all of the allocated space. */
+	void                      cleanUp();
+
+	/* Getters. */
+	GLfloat                   getG()            const  {  return G;            }
+	GLuint                    t()               const  {  return clock;        }
+	OrbitalBody*              getBody(GLuint i)        {  return bodies.at(i); }
+	std::vector<Mesh*>        getMeshes()       const  {  return meshes;       }
+	std::vector<glm::mat4*>   getTransforms()   const  {  return transforms;   }
+	glm::mat4                 getStarsMatrix()  const  {  return starsMatrix;  }
+	Mesh*                     getStars()        const  {  return stars;        }
+
+protected:
+	
+	/* Private default constructor (used for loading xml file).*/
+	OrbitalSystem() :
+	G(0.0f), clock(0), stars(nullptr) {}
+
+	/* Collection of orbital bodies in this system. */
+	GLfloat                   G;
+	GLuint                    clock;
+	GLfloat                   scale;
+	std::vector<OrbitalBody*> bodies;
+	Mesh*                     stars;
+	glm::mat4                 starsMatrix;
+	std::vector<Mesh*>        meshes;
+	std::vector<glm::mat4*>   transforms;
+};
+
