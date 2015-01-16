@@ -13,10 +13,11 @@
 #include  "OrbitalBody.h"
 #include  "Geometry.h"
 
-#define   SIM_SECONDS_PER_REAL_SECOND             60.0f
-#define   SECONDS_PER_HOUR                      3600.0f
-#define   MAX_DELTA_T                            100.0f                
-#define   DEFAULT_G                        6.67384e-20f
+#define   SIM_SECONDS_PER_REAL_SECOND                           30.0f
+#define   SECONDS_PER_HOUR                                    3600.0f
+#define   MAX_DELTA_T                                          100.0f                
+#define   DEFAULT_G                                      6.67384e-20f
+#define   DEFAULT_TILT_AXIS            glm::vec3{+1.0f, +0.0f, +0.0f}
 
 /******************************************************************************
  *																			  *

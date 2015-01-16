@@ -157,8 +157,9 @@ void Display::updateViewport()
 	glViewport(0, 0, width, height);
 
 	/* Calculate the View-To-Projection matrix. */
-	viewToProjectionMatrix = glm::perspective(DEFAULT_FOV, aspectRatio, 
-		DEFAULT_NEAR_PLANE, DEFAULT_FAR_PLANE);
+	viewToProjectionMatrix = glm::perspectiveFov((GLfloat) DEFAULT_FOV, 
+		(GLfloat) width,  (GLfloat) height, DEFAULT_NEAR_PLANE,
+		DEFAULT_FAR_PLANE);
 }
 
 /******************************************************************************
@@ -197,6 +198,9 @@ void Display::repaint(std::vector<Mesh*> meshes,
 
 	glEnable(GL_DEPTH_TEST);
 
+	glm::mat4 id = viewToProjectionMatrix * camera.getWorldToViewMatrix();
+	glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE, &id[0][0]);
+
 	/* Draw 3-D space. */
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
@@ -225,8 +229,6 @@ void Display::repaint(std::vector<Mesh*> meshes,
                        0);                               // Index offset
 
 	}
-	/* Draw 2-D Overlay. */
-
 
 	/* Swap the double buffer. */
 	SDL_GL_SwapWindow(window);

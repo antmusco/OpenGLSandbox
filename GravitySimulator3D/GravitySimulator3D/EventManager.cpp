@@ -99,19 +99,17 @@ void EventManager::handleKeyPress(SDL_Scancode key)
 	/* Strafe Right. */
 	case SDL_SCANCODE_D:
 	case SDL_SCANCODE_RIGHT:
-		move = glm::cross(*(camera->getUpDirection()), *(camera->getViewDirection()));
+		move = glm::cross(*(camera->getViewDirection()), *(camera->getUpDirection()));
 		move = move / glm::length(move);
 		*( camera->getPosition() ) += move * scale;
-		*( camera->getViewDirection() ) += move;
 		break;
 
 	/* Strafe Left. */
 	case SDL_SCANCODE_A:
 	case SDL_SCANCODE_LEFT:
-		move = glm::cross(*( camera->getViewDirection() ), *( camera->getUpDirection() ));
+		move = glm::cross(*( camera->getUpDirection() ), *( camera->getViewDirection() ));
 		move = move / glm::length(move);
 		*( camera->getPosition() ) += move * scale;
-		*( camera->getViewDirection() ) += move;
 		break;
 
 	/* Step Forward. */
@@ -120,7 +118,6 @@ void EventManager::handleKeyPress(SDL_Scancode key)
 		move = *( camera->getViewDirection() );
 		move /= glm::length(move);
 		*( camera->getPosition() ) += move * scale;
-		*( camera->getViewDirection() ) += move * scale;
 		break;
 
 	/* Step Backward. */
@@ -129,23 +126,20 @@ void EventManager::handleKeyPress(SDL_Scancode key)
 		move = *(camera->getViewDirection());
 		move = -1.0f * ( move / glm::length(move) );
 		*( camera->getPosition() ) += move * scale;
-		*( camera->getViewDirection() ) += move * scale;
 		break;
 
 	/* Step Down. */
 	case SDL_SCANCODE_Z:
 		move = *(camera->getUpDirection());
 		move /= glm::length(move);
-		*( camera->getPosition() ) += move * scale;
-		*( camera->getViewDirection() ) += move * scale;
+		*( camera->getPosition() ) -= move * scale;
 		break;
 
 	/* Step Up. */
 	case SDL_SCANCODE_X:
 		move = *( camera->getUpDirection() );
-		move /= -glm::length(move);
+		move /= glm::length(move);
 		*( camera->getPosition() ) += move * scale;
-		*( camera->getViewDirection() ) += move * scale;
 		break;
 	case  SDL_SCANCODE_ESCAPE:
 		exit(0);

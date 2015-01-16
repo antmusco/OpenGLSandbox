@@ -13,11 +13,11 @@
 *                                 Default Values                              *
 *                                                                             *
 ******************************************************************************/
-#define  DEFAULT_ROTATE_SPEED    0.01f
-#define  DEFAULT_MAX_MOVEMENT    50.0f
+#define  DEFAULT_ROTATE_SPEED                    0.005f
+#define  DEFAULT_MAX_MOVEMENT                     50.0f
 #define  DEFAILT_POSITION        +1500.0f, +0.0f, +0.0f
-#define  DEFAULT_VIEW_DRIECTION  +1490.0f, +0.0f, +0.0f
-#define  DEFAULT_UP_DIRECTION    +0.0f, +1.0f, +0.0f
+#define  DEFAULT_VIEW_DRIECTION  -   1.0f, +0.0f, +0.0f
+#define  DEFAULT_UP_DIRECTION    +   0.0f, +1.0f, +0.0f
 
 /******************************************************************************
 *                                                                             *

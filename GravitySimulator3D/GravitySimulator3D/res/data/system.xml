@@ -6,8 +6,9 @@
     <meshFile>res/meshes/sphere.obj</meshFile>
     <textureFile>res/textures/milkyway.jpg</textureFile>
     <radius>1.000e5</radius>
+    <tilt>60.0</tilt>
   </background>
-	<center>
+	<bodies>
 		<body>
 			<name>Earth</name>
 			<mass>5.972e24</mass>
@@ -15,20 +16,18 @@
 			<meshFile>res/meshes/sphere.obj</meshFile>
 			<textureFile>res/textures/earth.jpg</textureFile>
 			<position>
-				<x>0.0f</x>
-				<y>0.0f</y>
-				<z>0.0f</z>
+				<x>0.0</x>
+				<y>0.0</y>
+				<z>0.0</z>
 			</position>
 			<velocity>
-				<x>0.0f</x>
-				<y>0.0f</y>
-				<z>0.0f</z>
+				<x>0.0</x>
+				<y>0.0</y>
+				<z>-1.261e0</z>
 			</velocity>
 			<tilt>23.5</tilt>
 			<rotationalSpeed>4.1781e-3</rotationalSpeed>
-		</body>
-	</center>
-	<bodies>	
+		</body>	
 		<body>
 			<name>Moon</name>
 			<mass>7.3477e22</mass>
@@ -36,14 +35,14 @@
 			<meshFile>res/meshes/sphere.obj</meshFile>
 			<textureFile>res/textures/moon.jpg</textureFile>
 			<position>
-				<x>3.8440e8f</x>
-				<y>0.0f</y>
-				<z>0.0f</z>
+				<x>3.8440e8</x>
+				<y>0.0</y>
+				<z>0.0</z>
 			</position>
 			<velocity>
-				<x>0.0f</x>
-				<y>0.0f</y>
-				<z>1.025e3f</z>
+				<x>0.0</x>
+				<y>0.0</y>
+				<z>1.025e3</z>
 			</velocity>
 			<tilt>6.687</tilt>
 			<rotationalSpeed>1.5251e-4</rotationalSpeed>

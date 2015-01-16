@@ -21,9 +21,9 @@
  ******************************************************************************/
 
 /* Field of View parameter. */
-#define  DEFAULT_FOV              30.0f
+#define  DEFAULT_FOV              (60.0 * M_PI / 180.0)
 /* Near clipping plane parameter. */
-#define  DEFAULT_NEAR_PLANE       0.1f
+#define  DEFAULT_NEAR_PLANE       1.0f
 /* Far clipping plane parameter. */
 #define  DEFAULT_FAR_PLANE        150000.0f
 /* Default vertex and fragment shader source files. */

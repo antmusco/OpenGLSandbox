@@ -55,7 +55,7 @@ Camera::Camera() :
 glm::mat4 Camera::getWorldToViewMatrix() const
 {
 	/* Look in the current direction. */
-	return glm::lookAt(position, viewDirection, upDirection);
+	return glm::lookAt(position, position + viewDirection, upDirection);
 }
 
 void Camera::updateLookAt(const glm::vec2 &newMousePosition)
@@ -72,8 +72,8 @@ void Camera::updateLookAt(const glm::vec2 &newMousePosition)
 	{
 			/* Generate the transformation = sideways * vertical rotation. */
 			glm::mat4 rotator =
-				glm::rotate(mouseDelta.x * rotateSpeed,	upDirection) *
-				glm::rotate(mouseDelta.y * rotateSpeed,	sideDirection);
+				glm::rotate(mouseDelta.x * rotateSpeed,	-upDirection) *
+				glm::rotate(mouseDelta.y * rotateSpeed,	-sideDirection);
 
 			/* Set the new view direction. */
 			viewDirection = glm::mat3(rotator) * viewDirection;

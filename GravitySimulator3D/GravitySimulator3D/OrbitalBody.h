@@ -11,6 +11,7 @@
 #include  "glm\glm.hpp"
 #include  "glm\gtc\matrix_transform.hpp"
 #include  "glm\gtx\vector_angle.hpp"
+#include  <glm\gtx\rotate_vector.hpp>
 #include  <iostream>
 
 /******************************************************************************
@@ -127,13 +128,10 @@ public:
 		glm::mat4 rotM;
 		
 		glm::vec3 cross = glm::cross(DEFAULT_ROT_AXIS, rotationalAxis);
-		//std::cout << "{" << cross.x << ", " << cross.y << ", " << cross.z << "}" << std::endl;
 
 		/* Rotate to angle of inclination. */
 		if(rotationalAxis != DEFAULT_ROT_AXIS)
-			rotM                  = glm::rotate(rotationalAngle,
-												glm::cross(rotationalAxis, 
-												DEFAULT_ROT_AXIS));
+			rotM                  = glm::rotate(rotationalAngle, cross);
 		
 		rotM                      = glm::rotate(rotM, 
                                                 angularPosition,
@@ -201,13 +199,18 @@ public:
 	void           setLinearVelocity(glm::vec3 v) {  linearVelocity    = v;  }
 	void           setLinearAccel(glm::vec3 a)    {  linearAccel       = a;  }
 	void           setLinearThrust(glm::vec3 t)   {  linearThrust      = t;  }
-	void           setRotationalAxis(glm::vec3 a) 
+	void           setRotationalAxis(GLfloat tilt) 
 	{  
-		rotationalAxis = a / glm::length(a);
-		rotationalAngle = glm::angle(DEFAULT_ROT_AXIS, rotationalAxis) *
-                          RAD_TO_DEG;
+		rotationalAngle = tilt * 3.14f / 180.0f;
+		rotationalAxis  = glm::rotateX(DEFAULT_ROT_AXIS, rotationalAngle);
 	}
-	void           setAngularPosition(GLfloat p)  {  angularPosition   = p;  }
+	void           setAngularPosition(GLfloat p)  
+	{  
+		if(p < 2 * M_PI)
+			angularPosition = p; 
+		else
+			angularPosition = p - ((GLfloat) 2 * M_PI);
+	}
 	void           setAngularVelocity(GLfloat v)  {  angularVelocity   = v;  }
 	void           setAngularAccel(GLfloat a)     {  angularAccel      = a;  }
 	void           setAngularThrust(GLfloat t)    {  angularThrust     = t;  }

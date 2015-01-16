@@ -32,7 +32,7 @@
 #define  MESHES_PATH          "res/meshes/";
 #define  TEXUTRES_PATH        "res/textures/";
 #define  SHADERS_PATH         "res/shaders/";
-#define  FRAMES_PER_SECOND    60
+#define  FRAMES_PER_SECOND    100
 #define  PROJECT_TITLE        "GravitySimulator3D"
 
 /******************************************************************************
@@ -41,7 +41,7 @@
 *                                                                             *
 ******************************************************************************/
 /* Speed of the simulation. */
-GLfloat speed = + 1.000f;
+GLfloat speed = + 20.000f;
 
 /* Unit vectors for the 3-D space. */
 glm::vec3  bases[] =
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	/* Create the display, shader, camera, and event manager. */
-	Display      display(PROJECT_TITLE, DEFAULT_HEIGHT, DEFAULT_WIDTH);
+	Display      display(PROJECT_TITLE, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	Shader       shader(DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
 	Camera*      camera = display.getCamera();
 	EventManager eventManager(camera, &speed);
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 	/* Begin the milliseconds counter. */
 	GLuint startMillis, tempMillis, currentMillis, millisPerFrame;
 	startMillis = tempMillis = currentMillis = SDL_GetTicks();	
-	millisPerFrame = (1 / FRAMES_PER_SECOND) * MILLIS_PER_SECOND;
+	millisPerFrame = (1.0 / FRAMES_PER_SECOND) * MILLIS_PER_SECOND;
 
 	/* Main loop. */
 	while (event.type != SDL_QUIT)
@@ -110,6 +110,9 @@ int main(int argc, char* argv[])
 
 		/* Interpolate the system over the interval. */
 		system.interpolate((speed * (currentMillis - tempMillis)) / 1000);
+
+		std::cout << "Interp time:  " << speed * (currentMillis - tempMillis) / 1000 << "\tseconds." << std::endl;
+		std::cout << "Time passed:  " << currentMillis - startMillis << " \tmillis." << std::endl;
 
 		/* If a new frame is to be drawn, update the display. */
 		if ((currentMillis - startMillis) >= millisPerFrame)

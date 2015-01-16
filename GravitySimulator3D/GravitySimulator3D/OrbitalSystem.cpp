@@ -1,5 +1,6 @@
 #include "OrbitalSystem.h"
 #include "tinyxml2.h"
+#include <glm\gtx\rotate_vector.hpp>
 #include <iostream>
 #include "Planet.h"
 
@@ -98,6 +99,7 @@ void OrbitalSystem::rungeKattaApprx(OrbitalBody* subject, const GLfloat dt)
 	v += c * (l[0] + l[1] + l[2] + l[3]);
 
 	subject->setLinearPosition(r);
+	subject->setAngularPosition(subject->getAngularPosition() + subject->getAngularVelocity() * dt);
 	subject->setLinearVelocity(v);
 	subject->setGravityVector(gravityVector(subject, r));
 	subject->snapshotMatrix();
@@ -130,73 +132,84 @@ OrbitalSystem OrbitalSystem::loadFile(const char* xmlFile)
 		tinyxml2::XMLDocument doc;
 		if(!doc.LoadFile(xmlFile)) 
 		{
+			/* Get the root, background, and bodies elements of the document. */
 			tinyxml2::XMLElement* root   = doc.RootElement();
-
-			const char* g     = root->FirstChildElement("g")->GetText();
-			const char* scale = root->FirstChildElement("scale")->GetText();
-			newSystem.scale   = (GLfloat) atof(scale);
-			newSystem.G       = (GLfloat) atof(g) / newSystem.scale;
-
 			tinyxml2::XMLElement* background = root->FirstChildElement("background");
-			const char* backMeshFile = background->FirstChildElement("meshFile")->GetText();
-			const char* backTextFile = background->FirstChildElement("textureFile")->GetText();
-			const char* backRadius   = background->FirstChildElement("radius")->GetText();
-			
-			newSystem.stars = Geometry::loadObj(backMeshFile, backTextFile);
-			newSystem.meshes.push_back(newSystem.stars);
-			newSystem.starsMatrix = glm::scale(glm::mat4(), glm::vec3(atof(backRadius)));
-			newSystem.transforms.push_back(&newSystem.starsMatrix);
-			
-			tinyxml2::XMLElement* center = root->FirstChildElement("center")->FirstChildElement("body");
-			const char* centerName     = center->FirstChildElement("name")->GetText();
-			const char* centerMass     = center->FirstChildElement("mass")->GetText();
-			const char* centerRadius   = center->FirstChildElement("radius")->GetText();
-			const char* centerMeshFile = center->FirstChildElement("meshFile")->GetText();
-			const char* centerTextFile = center->FirstChildElement("textureFile")->GetText();
-			const char* centerPosX     = center->FirstChildElement("position")->FirstChildElement("x")->GetText();
-			const char* centerPosY     = center->FirstChildElement("position")->FirstChildElement("y")->GetText();
-			const char* centerPosZ     = center->FirstChildElement("position")->FirstChildElement("z")->GetText();
-			const char* centerVelX     = center->FirstChildElement("velocity")->FirstChildElement("x")->GetText();
-			const char* centerVelY     = center->FirstChildElement("velocity")->FirstChildElement("y")->GetText();
-			const char* centerVelZ     = center->FirstChildElement("velocity")->FirstChildElement("z")->GetText();
-			const char* centerTilt     = center->FirstChildElement("tilt")->GetText();
-			const char* centerRotSpeed = center->FirstChildElement("rotationalSpeed")->GetText();
-
-			GLfloat   cm = (GLfloat) atof(centerMass) / newSystem.scale;
-			GLfloat   cr = (GLfloat) atof(centerRadius) / newSystem.scale;
-			glm::vec3 cp = glm::vec3(atof(centerPosX), atof(centerPosY), atof(centerPosZ)) / newSystem.scale;
-			glm::vec3 cv = glm::vec3(atof(centerVelX), atof(centerVelY), atof(centerVelZ)) / sqrt(newSystem.scale);
-
-			newSystem.addBody(new Planet(centerName, cm, cr, centerMeshFile, centerTextFile, cp, cv));
-		
 			tinyxml2::XMLElement* bodies = root->FirstChildElement("bodies");
+
+			/* Parse the root parameters of the system. */
+			const char* g_str          = root->FirstChildElement("g")->GetText();
+			GLfloat     g_float        = (GLfloat) atof(g_str);
+			const char* scale_str      = root->FirstChildElement("scale")->GetText();
+			GLfloat     scale_float    = (GLfloat) atof(scale_str);
+
+			/* Set the root parameters of the system. */
+			newSystem.scale            = scale_float;
+			newSystem.G                = g_float / scale_float;
+
+			/* Parse the background parameters of the system. */
+			const char* bgMeshFile_str = background->FirstChildElement("meshFile")->GetText();
+			const char* bgTextFile_str = background->FirstChildElement("textureFile")->GetText();
+			const char* bgRadius_str   = background->FirstChildElement("radius")->GetText();
+			GLfloat     bgRadius_float = (GLfloat) atof(bgRadius_str);
+			const char* bgTilt_str     = background->FirstChildElement("tilt")->GetText();
+			GLfloat     bgTilt_float   = (GLfloat) atof(bgTilt_str);
+
+			/* Set the background parameters of the system. */
+			newSystem.stars = Geometry::loadObj(bgMeshFile_str, bgTextFile_str);
+			newSystem.meshes.push_back(newSystem.stars);
+			glm::mat4 starsMatrix = glm::scale(glm::mat4(), glm::vec3(bgRadius_float));
+			newSystem.starsMatrix = glm::rotate(starsMatrix, bgTilt_float, DEFAULT_TILT_AXIS);
+			newSystem.transforms.push_back(&newSystem.starsMatrix);
+		
+			/* Parse each body of the system. */
 			for(tinyxml2::XMLElement* body = bodies->FirstChildElement("body"); body != NULL; body = body->NextSiblingElement("body"))
 			{
-				const char* bodyName     = body->FirstChildElement("name")->GetText();
-				const char* bodyMass     = body->FirstChildElement("mass")->GetText();
-				const char* bodyRadius   = body->FirstChildElement("radius")->GetText();
-				const char* bodyMeshFile = body->FirstChildElement("meshFile")->GetText();
-				const char* bodyTextFile = body->FirstChildElement("textureFile")->GetText();
-				const char* bodyPosX     = body->FirstChildElement("position")->FirstChildElement("x")->GetText();
-				const char* bodyPosY     = body->FirstChildElement("position")->FirstChildElement("y")->GetText();
-				const char* bodyPosZ     = body->FirstChildElement("position")->FirstChildElement("z")->GetText();
-				const char* bodyVelX     = body->FirstChildElement("velocity")->FirstChildElement("x")->GetText();
-				const char* bodyVelY     = body->FirstChildElement("velocity")->FirstChildElement("y")->GetText();
-				const char* bodyVelZ     = body->FirstChildElement("velocity")->FirstChildElement("z")->GetText();
-				const char* bodyTilt     = body->FirstChildElement("tilt")->GetText();
-				const char* bodyRotSpeed = body->FirstChildElement("rotationalSpeed")->GetText();
-				
-				GLfloat   bm = (GLfloat) atof(bodyMass) / newSystem.scale;
-				GLfloat   br = (GLfloat) atof(bodyRadius) / newSystem.scale;
-				std::cout << bodyPosX << std::endl;
-				glm::vec3 bp = glm::vec3(atof(bodyPosX), atof(bodyPosY), atof(bodyPosZ)) / newSystem.scale;
-			    glm::vec3 bv = glm::vec3(atof(bodyVelX), atof(bodyVelY), atof(bodyVelZ)) / sqrt(newSystem.scale);
+				/* Parse the body parameters for each body. */
+				const char* bodyName_str       = body->FirstChildElement("name")->GetText();
+				const char* bodyMass_str       = body->FirstChildElement("mass")->GetText();
+				GLfloat     bodyMass_float     = (GLfloat) atof(bodyMass_str);
+				const char* bodyRadius_str     = body->FirstChildElement("radius")->GetText();
+				GLfloat     bodyRadius_float   = (GLfloat) atof(bodyRadius_str);
+				const char* bodyMeshFile_str   = body->FirstChildElement("meshFile")->GetText();
+				const char* bodyTextFile_str   = body->FirstChildElement("textureFile")->GetText();
+				const char* bodyPosX_str       = body->FirstChildElement("position")->FirstChildElement("x")->GetText();
+				GLfloat     bodyPosX_float     = (GLfloat) atof(bodyPosX_str);  
+				const char* bodyPosY_str       = body->FirstChildElement("position")->FirstChildElement("y")->GetText();
+				GLfloat     bodyPosY_float     = (GLfloat) atof(bodyPosY_str);  
+				const char* bodyPosZ_str       = body->FirstChildElement("position")->FirstChildElement("z")->GetText();
+				GLfloat     bodyPosZ_float     = (GLfloat) atof(bodyPosZ_str);  
+				const char* bodyVelX_str       = body->FirstChildElement("velocity")->FirstChildElement("x")->GetText();
+				GLfloat     bodyVelX_float     = (GLfloat) atof(bodyVelX_str);  
+				const char* bodyVelY_str       = body->FirstChildElement("velocity")->FirstChildElement("y")->GetText();
+				GLfloat     bodyVelY_float     = (GLfloat) atof(bodyVelY_str);  
+				const char* bodyVelZ_str       = body->FirstChildElement("velocity")->FirstChildElement("z")->GetText();
+				GLfloat     bodyVelZ_float     = (GLfloat) atof(bodyVelZ_str);  
+				const char* bodyTilt_str       = body->FirstChildElement("tilt")->GetText();
+				GLfloat     bodyTilt_float     = (GLfloat) atof(bodyTilt_str);  
+				const char* bodyRotSpeed_str   = body->FirstChildElement("rotationalSpeed")->GetText();
+				GLfloat     bodyRotSpeed_float = (GLfloat) atof(bodyRotSpeed_str);
 
-				newSystem.addBody(new Planet(bodyName, bm, br, bodyMeshFile, bodyTextFile, bp, bv));
+				/* Set the body parameters for each body, and add the body to the system. */
+				glm::vec3   bodyPos_vec{bodyPosX_float, bodyPosY_float, bodyPosZ_float};
+				glm::vec3   bodyVel_vec{bodyVelX_float, bodyVelY_float, bodyVelZ_float};
+				Planet*     newBody = new Planet(bodyName_str,
+				                                 bodyMass_float/ scale_float, 
+				                                 bodyRadius_float/ scale_float,
+				                                 bodyMeshFile_str, 
+				                                 bodyTextFile_str, 
+				                                 bodyPos_vec/ scale_float, 
+				                                 bodyVel_vec/ sqrt(scale_float));
+
+				newBody->setRotationalAxis(bodyTilt_float);
+				newBody->setAngularVelocity(bodyRotSpeed_float);
+
+				newSystem.addBody(newBody);
 			}
 
 		}
 	}
+	/* Return the system. */
 	return newSystem;
 }
 
