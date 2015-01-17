@@ -27,7 +27,4 @@
     <None Include="res\shaders\shader.fs" />
     <None Include="res\shaders\shader.vs" />
   </ItemGroup>
-  <ItemGroup>
-    <Xml Include="res\data\system.xml" />
-  </ItemGroup>
 </Project>

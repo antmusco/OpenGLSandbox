@@ -23,7 +23,7 @@
 			<velocity>
 				<x>0.0</x>
 				<y>0.0</y>
-				<z>-1.261e1</z>
+				<z>1.261e1</z>
 			</velocity>
 			<tilt>23.5</tilt>
 			<rotationalSpeed>4.1781e-3</rotationalSpeed>
@@ -35,14 +35,14 @@
 			<meshFile>res/meshes/sphere.obj</meshFile>
 			<textureFile>res/textures/moon.jpg</textureFile>
 			<position>
-				<x>3.8440e8</x>
+				<x>3.844e8</x>
 				<y>0.0</y>
 				<z>0.0</z>
 			</position>
 			<velocity>
 				<x>0.0</x>
-				<y>0.0</y>
-				<z>1.025e3</z>
+				<y>+9.183e1</y>
+				<z>-1.021e3</z>
 			</velocity>
 			<tilt>6.687</tilt>
 			<rotationalSpeed>1.5251e-4</rotationalSpeed>

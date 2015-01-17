@@ -42,7 +42,7 @@
  *                                                                             *
  ******************************************************************************/
 /* Speed of the simulation. */
-GLfloat speed = + 1000.000f;
+GLfloat speed = + 2.000e2f;
 
 /* Unit vectors for the 3-D space. */
 glm::vec3  bases[] =
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 	SDL_PollEvent(&event);	
 
 	/* Begin the milliseconds counter. */
-	GLuint startMillis, tempMillis, currentMillis, millisPerFrame;
+	GLuint startMillis = 0, tempMillis = 0, currentMillis = 0, millisPerFrame = 0;
 	startMillis = tempMillis = currentMillis = SDL_GetTicks();	
 	millisPerFrame = (1.0 / FRAMES_PER_SECOND) * MILLIS_PER_SECOND;
 	PRINT(millisPerFrame)
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 		/* Interpolate the system over the interval. */
 		system.interpolate((speed * (currentMillis - tempMillis)) / 1000);
 
-		PRINT(glm::distance(system.getBody(0)->getLinearPosition(), system.getBody(1)->getLinearPosition()));
+		//PRINT(glm::distance(system.getBody(0)->getLinearPosition(), system.getBody(1)->getLinearPosition()));
 
 		/* If a new frame is to be drawn, update the display. */
 		if ((currentMillis - startMillis) >= millisPerFrame)

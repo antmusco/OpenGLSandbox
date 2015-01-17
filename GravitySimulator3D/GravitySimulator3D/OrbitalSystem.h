@@ -91,7 +91,7 @@ public:
 
 	/* Getters. */
 	GLfloat                   getG()            const  {  return G;            }
-	GLuint                    t()               const  {  return clock;        }
+	GLfloat                   t()               const  {  return clock;        }
 	OrbitalBody*              getBody(GLuint i)        {  return bodies.at(i); }
 	std::vector<Mesh*>        getMeshes()       const  {  return meshes;       }
 	std::vector<glm::mat4*>   getTransforms()   const  {  return transforms;   }
@@ -106,7 +106,7 @@ protected:
 
 	/* Collection of orbital bodies in this system. */
 	GLfloat                   G;
-	GLuint                    clock;
+	GLfloat                   clock;
 	GLfloat                   scale;
 	std::vector<OrbitalBody*> bodies;
 	Mesh*                     stars;
