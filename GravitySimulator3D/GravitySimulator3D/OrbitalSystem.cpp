@@ -34,7 +34,6 @@ void OrbitalSystem::removeBody(const GLuint i)
 	bodies.erase(bodies.begin() + i);
 }
 
-
 glm::vec3 OrbitalSystem::gravityVector(OrbitalBody* subject, glm::vec3 position)
 {
 	glm::vec3 netGravity(0);
@@ -70,6 +69,7 @@ glm::vec3 OrbitalSystem::A(OrbitalBody* subject, const glm::vec3 position, float
 {
 	/* Calculate the force of gravity the the body's new position. */
 	glm::vec3 netAcceleration = gravityVector(subject, position);
+
 	/* Account for thrust and return net Acceleration. */
 	return netAcceleration;
 	//return netAcceleration += dt * subject->getLinearThrust();
@@ -84,14 +84,13 @@ void OrbitalSystem::rungeKattaApprx(OrbitalBody* subject, const GLfloat dt)
 	glm::vec3     l[order];
 	glm::vec3     r          = subject->getLinearPosition();
 	glm::vec3     v          = subject->getLinearVelocity();
-	glm::vec3     a          = subject->getLinearAccel();
 			     	  
 	k[0]  = dt * v;
-	l[0]  = dt * a;
-	k[1]  = dt * (v + (l[0] / 2.0f));
-	l[1]  = dt * A(subject, r + (k[0] / 2.0f), (dt / 2.0f));
-	k[2]  = dt * (v + (l[1] / 2.0f));
-	l[2]  = dt * A(subject, r + (k[1] / 2.0f), (dt / 2.0f));
+	l[0]  = dt * A(subject, r, 0);
+	k[1]  = dt * (v + (0.5f * l[0]));
+	l[1]  = dt * A(subject, r + (0.5f * k[0]), (0.5f * dt));
+	k[2]  = dt * (v + (0.5f * l[1]));
+	l[2]  = dt * A(subject, r + (0.5f * k[1]), (0.5f * dt));
 	k[3]  = dt * (v + l[2]);
 	l[3]  = dt * A(subject, r + k[2], dt);
 
@@ -99,9 +98,9 @@ void OrbitalSystem::rungeKattaApprx(OrbitalBody* subject, const GLfloat dt)
 	v += c * (l[0] + l[1] + l[2] + l[3]);
 
 	subject->setLinearPosition(r);
-	subject->setAngularPosition(subject->getAngularPosition() + subject->getAngularVelocity() * dt);
 	subject->setLinearVelocity(v);
 	subject->setGravityVector(gravityVector(subject, r));
+	subject->setAngularPosition(subject->getAngularPosition() + subject->getAngularVelocity() * dt);
 	subject->snapshotMatrix();
 }
 
@@ -116,10 +115,7 @@ void OrbitalSystem::interpolate(GLfloat realSeconds)
 
 	/* Use Runge-Katta approximation to update the state vectors. */
 	for(OrbitalBody* subject : bodies) 
-	{
-		rungeKattaApprx(subject, dt);	
-		glm::vec3 g = subject->getGravityVector();
-	}
+		rungeKattaApprx(subject, dt);
 	
 }
 

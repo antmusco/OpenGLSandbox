@@ -1,8 +1,8 @@
-/******************************************************************************
-*                                                                             *
-*                              Included Header Files                          *
-*                                                                             *
-******************************************************************************/
+/*******************************************************************************
+ *                                                                             *
+ *                              Included Header Files                          *
+ *                                                                             *
+ ******************************************************************************/
 #include <gl\glew.h>
 #include <SDL\SDL.h>
 #include <glm\glm.hpp>
@@ -20,11 +20,11 @@
 #include "OrbitalSystem.h"
 #include "Planet.h"
 
-/******************************************************************************
-*                                                                             *
-*                        Defined Constants and Macros                         *
-*                                                                             *
-******************************************************************************/
+/*******************************************************************************
+ *                                                                             *
+ *                        Defined Constants and Macros                         *
+ *                                                                             *
+ ******************************************************************************/
 #define  FULLSCREEN_ENABLED   true
 #define  DEFAULT_HEIGHT		  600
 #define  DEFAULT_WIDTH        800
@@ -34,14 +34,15 @@
 #define  SHADERS_PATH         "res/shaders/";
 #define  FRAMES_PER_SECOND    100
 #define  PROJECT_TITLE        "GravitySimulator3D"
+#define  PRINT(a)             std::cout << a << std::endl;
 
-/******************************************************************************
-*                                                                             *
-*                                Global Variables                             *
-*                                                                             *
-******************************************************************************/
+/*******************************************************************************
+ *                                                                             *
+ *                                Global Variables                             *
+ *                                                                             *
+ ******************************************************************************/
 /* Speed of the simulation. */
-GLfloat speed = + 20.000f;
+GLfloat speed = + 1000.000f;
 
 /* Unit vectors for the 3-D space. */
 glm::vec3  bases[] =
@@ -51,26 +52,26 @@ glm::vec3  bases[] =
         {+0.0f, +0.0f, +1.0f}
     };
 
-/******************************************************************************
-*                                                                             *
-*                                     main                                    *
-*                                                                             *
-*******************************************************************************
-* PARAMETERS                                                                  *
-*  argc                                                                       *
-*        The number of command line strings.                                  *
-*  argv                                                                       *
-*        The array of command line stirngs.                                   *
-*                                                                             *
-*******************************************************************************
-* RETURNS                                                                     *
-*  0 on success, any non-zero value on failure.                               *
-*                                                                             *
-*******************************************************************************
-* DESCRIPTION                                                                 *
-*  Beginning point of the program.                                            *
-*                                                                             *
-*******************************************************************************/
+/*******************************************************************************
+ *                                                                             *
+ *                                     main                                    *
+ *                                                                             *
+ *******************************************************************************
+ * PARAMETERS                                                                  *
+ *  argc                                                                       *
+ *        The number of command line strings.                                  *
+ *  argv                                                                       *
+ *        The array of command line stirngs.                                   *
+ *                                                                             *
+ *******************************************************************************
+ * RETURNS                                                                     *
+ *  0 on success, any non-zero value on failure.                               *
+ *                                                                             *
+ *******************************************************************************
+ * DESCRIPTION                                                                 *
+ *  Beginning point of the program.                                            *
+ *                                                                             *
+ *******************************************************************************/
 int main(int argc, char* argv[])
 {
 	/* Initialize SDL with all subsystems. */
@@ -98,6 +99,7 @@ int main(int argc, char* argv[])
 	GLuint startMillis, tempMillis, currentMillis, millisPerFrame;
 	startMillis = tempMillis = currentMillis = SDL_GetTicks();	
 	millisPerFrame = (1.0 / FRAMES_PER_SECOND) * MILLIS_PER_SECOND;
+	PRINT(millisPerFrame)
 
 	/* Main loop. */
 	while (event.type != SDL_QUIT)
@@ -111,8 +113,7 @@ int main(int argc, char* argv[])
 		/* Interpolate the system over the interval. */
 		system.interpolate((speed * (currentMillis - tempMillis)) / 1000);
 
-		std::cout << "Interp time:  " << speed * (currentMillis - tempMillis) / 1000 << "\tseconds." << std::endl;
-		std::cout << "Time passed:  " << currentMillis - startMillis << " \tmillis." << std::endl;
+		PRINT(glm::distance(system.getBody(0)->getLinearPosition(), system.getBody(1)->getLinearPosition()));
 
 		/* If a new frame is to be drawn, update the display. */
 		if ((currentMillis - startMillis) >= millisPerFrame)

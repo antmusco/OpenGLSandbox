@@ -13,7 +13,7 @@
 #include  "OrbitalBody.h"
 #include  "Geometry.h"
 
-#define   SIM_SECONDS_PER_REAL_SECOND                           30.0f
+#define   SIM_SECONDS_PER_REAL_SECOND                            1.0f
 #define   SECONDS_PER_HOUR                                    3600.0f
 #define   MAX_DELTA_T                                          100.0f                
 #define   DEFAULT_G                                      6.67384e-20f
@@ -68,6 +68,8 @@ public:
 	/* Remove a body from the system given its name. */
 	void                      removeBody       (const GLuint       i          );
 	
+	/* Adjust the gravity vector for each body in the system. */
+	void                      compute          (                              );
 	/* Update the system by incrementing the time until seconds have passed. */
 	void                      interpolate      (const GLfloat      seconds    );
 	

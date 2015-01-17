@@ -198,9 +198,6 @@ void Display::repaint(std::vector<Mesh*> meshes,
 
 	glEnable(GL_DEPTH_TEST);
 
-	glm::mat4 id = viewToProjectionMatrix * camera.getWorldToViewMatrix();
-	glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE, &id[0][0]);
-
 	/* Draw 3-D space. */
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
