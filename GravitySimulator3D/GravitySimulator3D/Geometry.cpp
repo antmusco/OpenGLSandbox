@@ -817,9 +817,12 @@ Mesh* Geometry::loadObj(const char* objFile, const char* textFile)
 	for(GLuint i = 0; i < (s.mesh.positions.size() / 3); i++) 
 	{
 		localVertices.push_back({
+			/* Vertex Position. */
 			{s.mesh.positions.at((3 * i) + 0), s.mesh.positions.at((3 * i) + 1), s.mesh.positions.at((3 * i) + 2)},
+			/* Vertex Color. */
 			color,
-			{1 - s.mesh.texcoords.at((2 * i) + 0), s.mesh.texcoords.at((2 * i) + 1)}
+			/* U, V Coordinate. */
+			{s.mesh.texcoords.at((2 * i) + 0), 1 - s.mesh.texcoords.at((2 * i) + 1) }
 		});
 	}
 
@@ -935,12 +938,6 @@ void Mesh::genTextureID(const char* filename)
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	
-			glBindVertexArray(vertexArrayID);
-
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
-				(void*) ATTRIBUTE_2_OFFSET);
 		}
 	}
 }
@@ -1010,11 +1007,13 @@ void Mesh::genVertexArrayID()
 	glBindVertexArray(vertexArrayID);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 		
 	/* Bind the vertex buffer. */
 	glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[0]);
 	glBindAttribLocation(Geometry::shader->getProgram(), 0, "modelPostion");
 	glBindAttribLocation(Geometry::shader->getProgram(), 1, "modelColor");
+	glBindAttribLocation(Geometry::shader->getProgram(), 2, "modelTexCoord");
 
 	/* Vertex position attribute. */
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 
@@ -1023,6 +1022,10 @@ void Mesh::genVertexArrayID()
 	/* Vertex color attribute. */
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,	sizeof(Vertex), 
 		(void*) ATTRIBUTE_1_OFFSET);
+
+	/* Vertex texuter coordinate attribute. */
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(void*)ATTRIBUTE_2_OFFSET);
 }
 
 /******************************************************************************

@@ -217,6 +217,7 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
 			&modelToProjectionMatrix[0][0]);
 
+		glActiveTexture(GL_TEXTURE0);
 		glUniform1i(textureUniformLocation, 0);
 
 		/* Draw the elements to the window. */

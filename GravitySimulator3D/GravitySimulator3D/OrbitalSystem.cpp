@@ -109,7 +109,7 @@ void OrbitalSystem::interpolate(GLfloat realSeconds)
 {
 	/* Convert from real time to game time. */
 	GLfloat dt = (GLfloat) (realSeconds * SIM_SECONDS_PER_REAL_SECOND);
-	std::cout << realSeconds << " -> " << dt << std::endl;
+	//std::cout << realSeconds << " -> " << dt << std::endl;
 
 	/* Add the time to the global clock. */
 	clock += dt;

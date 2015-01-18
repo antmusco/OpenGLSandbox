@@ -15,7 +15,6 @@ void main()
 {
 	vec4 v = vec4(modelPosition, 1.0);
 	gl_Position = modelToProjectionMatrix * v;
-	outTexCoord.x = 1 - modelTexCoord.x;
-	outTexCoord.y = 1 - modelTexCoord.y;
+	outTexCoord = modelTexCoord;
 	outColor = modelColor;
 }
