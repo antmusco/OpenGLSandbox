@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="system">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element type="xs:float" name="g"/>
+        <xs:element type="xs:float" name="scale"/>
+        <xs:element name="background">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="meshFile"/>
+              <xs:element type="xs:string" name="textureFile"/>
+              <xs:element type="xs:float" name="radius"/>
+              <xs:element type="xs:float" name="tilt"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="bodies">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="body" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="name"/>
+                    <xs:element type="xs:float" name="mass"/>
+                    <xs:element type="xs:float" name="radius"/>
+                    <xs:element type="xs:string" name="meshFile"/>
+                    <xs:element type="xs:string" name="textureFile"/>
+                    <xs:element name="position">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:float" name="x"/>
+                          <xs:element type="xs:float" name="y"/>
+                          <xs:element type="xs:float" name="z"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="velocity">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:float" name="x"/>
+                          <xs:element type="xs:float" name="y"/>
+                          <xs:element type="xs:float" name="z"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:float" name="tilt"/>
+                    <xs:element type="xs:float" name="rotationalSpeed"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
