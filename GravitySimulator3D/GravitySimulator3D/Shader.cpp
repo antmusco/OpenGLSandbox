@@ -66,7 +66,8 @@ Shader::Shader(std::string vertexShaderFilepath,
 	/* Bind the indicated data attributes to the variables. */
 	glBindAttribLocation(program, 0, "modelPosition");
 	glBindAttribLocation(program, 1, "modelColor");
-	glBindAttribLocation(program, 2, "modelTexCoord");
+	glBindAttribLocation(program, 2, "modelNormal");
+	glBindAttribLocation(program, 3, "modelTexCoord");
 
 	/* Link the shader objects. */
 	glLinkProgram(program);

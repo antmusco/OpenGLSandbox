@@ -6,6 +6,7 @@ uniform mat4 modelToProjectionMatrix;
 
 attribute vec3 modelPosition;
 attribute vec3 modelColor;
+attribute vec3 modelNormal;
 attribute vec2 modelTexCoord;
 
 varying vec3 outColor;

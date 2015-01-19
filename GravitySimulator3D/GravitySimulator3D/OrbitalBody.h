@@ -155,15 +155,11 @@ public:
 		linearAccel     += dt * (linearThrust / mass);
 		linearVelocity  += dt * linearAccel + (gravityVector / mass);
 		linearPosition  += dt * linearVelocity;
-		if(name == "Earth")
-			//std::cout << "{" << gravityVector.x << ", " << gravityVector.y << ", " << gravityVector.z << "}"  << std::endl;
 
 		/* Rotational parameters. */
 		angularAccel    += dt * (angularThrust / mass);
 		angularVelocity += dt * angularAccel;
 		angularPosition += dt * angularVelocity;
-
-
 
 		/* Account for full revolution. */
 		if(angularPosition > DEGREES_PER_REV) 
@@ -209,7 +205,7 @@ public:
 		if(p < 2 * M_PI)
 			angularPosition = p; 
 		else
-			angularPosition = p - ((GLfloat) 2 * M_PI);
+			angularPosition = p - ((GLfloat) (2 * M_PI));
 	}
 	void           setAngularVelocity(GLfloat v)  {  angularVelocity   = v;  }
 	void           setAngularAccel(GLfloat a)     {  angularAccel      = a;  }
@@ -257,42 +253,4 @@ protected:
 	glm::mat4      transMatrix;
 	Mesh*          trail;
 
-};
-
-class Trail : public Mesh
-{
-public:
-
-	const GLuint MAX_VERTICES = 50;
-	const glm::vec3 color   = {+1.0f, +1.0f, +1.0f};
-	const glm::vec2 texture = {+0.0f, +0.0f};
-
-	Trail() : front(-1), back(-1) 
-	{
-		vertices = new Vertex[MAX_VERTICES];
-		indices  = new GLushort[2 * (MAX_VERTICES - 1)];
-	}
-
-	void addPoint(glm::vec3 p) 
-	{
-		Vertex v{p, color, texture};
-
-		/* Empty queue. */
-		if(back == -1) 
-		{
-			vertices[0] = v;
-			front = back = 0;
-		}
-		/* Submaximal queue */
-		else
-		{
-			back = (back + 1) % MAX_VERTICES;
-			vertices[back] = v;
-			if (front == back)
-				front = (front + 1) % MAX_VERTICES;
-		} 
-	}
-private:
-	GLint  front;
-	GLint  back;
 };

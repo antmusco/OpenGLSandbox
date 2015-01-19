@@ -47,5 +47,24 @@
 			<tilt>6.687</tilt>
 			<rotationalSpeed>1.5251e-4</rotationalSpeed>
 		</body>
+		<body>
+			<name>Mars</name>
+			<mass>6.4185e23</mass>
+			<radius>3.376e6</radius>
+			<meshFile>res/meshes/sphere.obj</meshFile>
+			<textureFile>res/textures/mars.jpg</textureFile>
+			<position>
+				<x>-3.844e8</x>
+				<y>0.0</y>
+				<z>0.0</z>
+			</position>
+			<velocity>
+				<x>0.0</x>
+				<y>-9.183e1</y>
+				<z>+1.021e3</z>
+			</velocity>
+			<tilt>6.687</tilt>
+			<rotationalSpeed>1.5251e-4</rotationalSpeed>
+		</body>
 	</bodies>
 </system>

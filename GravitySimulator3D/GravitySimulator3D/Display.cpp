@@ -207,25 +207,29 @@ void Display::repaint(std::vector<Mesh*> meshes,
             camera.getWorldToViewMatrix() *	   // World -> View 
             *(modelToWorldMatrices.at(i));     // Model -> World
 
-		/* Bind the appropriate vertex array. */
+		/* Bind the appropriate Vertex Array. */
 		glBindVertexArray(meshes.at(i)->getVertexArrayID());
+
+		/* Bind the appropriate Index Array. */
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes.at(i)->getBufferIDs()[1]);
-		if(meshes.at(i)->getTextureID() != -1)
+
+		/* If a texture has been generated, bind the Texture ID. */
+		if (meshes.at(i)->getTextureID() != -1)
 			glBindTexture(GL_TEXTURE_2D, meshes.at(i)->getTextureID());
+
+		/* Set the active Texture. */
+		glActiveTexture(GL_TEXTURE0);
+		glUniform1i(textureUniformLocation, 0);
 
 		/* Send the transformation data down to the buffer. */
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
 			&modelToProjectionMatrix[0][0]);
-
-		glActiveTexture(GL_TEXTURE0);
-		glUniform1i(textureUniformLocation, 0);
 
 		/* Draw the elements to the window. */
 		glDrawElements(meshes.at(i)->getDrawMode(),      // Draw mode.
                        meshes.at(i)->getNumIndices(),    // Number of indices
 					   GL_UNSIGNED_SHORT,                // Data type of index
                        0);                               // Index offset
-
 	}
 
 	/* Swap the double buffer. */

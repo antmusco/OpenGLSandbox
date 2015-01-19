@@ -19,9 +19,11 @@
 ******************************************************************************/
 #define DEFAULT_NUM_BUFFERS	    2
 #define DEFAULT_DRAW_MODE       GL_TRIANGLES
+#define DEFAULT_VERTEX_COLOR    glm::vec3(+1.0f, +1.0f, +1.0f)
 #define ATTRIBUTE_0_OFFSET      (sizeof(GLfloat) * 0)
 #define ATTRIBUTE_1_OFFSET      (sizeof(GLfloat) * 3)
 #define ATTRIBUTE_2_OFFSET      (sizeof(GLfloat) * 6)
+#define ATTRIBUTE_3_OFFSET      (sizeof(GLfloat) * 9)
 
 /******************************************************************************
 *                                                                             *
@@ -48,6 +50,7 @@ struct Vertex
 {
 	glm::vec3      position;
 	glm::vec3      color;
+	glm::vec3      normal;
 	glm::vec2      textureCoordinate;
 };
 
@@ -195,27 +198,7 @@ class Geometry
 public:
 	/* Shader program. */
 	static Shader*   shader;
-	/* Triangle. */
-	static Mesh      makeTriangle();
-	/* Cube. */
-	static Mesh      makeCube();
-	/* Shpere. */
-	static Mesh      makeSphere(GLuint tesselation);
-	/* Icosohedron. */
-	static Mesh      makeIsocohedron();
-	/* Plane. */
-	static Mesh      makePlane(glm::vec3  x, 
-                               glm::vec3  y);
 	/* Load from .obj file. */
 	static Mesh*     loadObj(const char* objFile, 
                              const char* textFile = NULL);
-	/* Coordinate Plane. */
-	static Mesh      makeCoordinatePlane(GLint  xWidth, 
-                                         GLint  yWidth, 
-                                         GLint  zWidth);
-	/* Get the middle index of two indices. */
-	static GLushort  getMiddlePoint(GLushort                     i1, 
-                                    GLushort                     i2, 
-		                            std::vector<Vertex>          *verts, 
-                                    std::map<GLuint, GLushort>*  cache);
 };

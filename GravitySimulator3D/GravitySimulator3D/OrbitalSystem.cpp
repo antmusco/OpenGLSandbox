@@ -13,11 +13,11 @@ OrbitalSystem::OrbitalSystem(const OrbitalSystem& rhs) :
 		bodies.push_back(new OrbitalBody(*b));
 	
 	meshes.push_back(stars);
-	for(int i = 0; i < bodies.size(); i++)
+	for(unsigned int i = 0; i < bodies.size(); i++)
 		meshes.push_back(bodies.at(i)->getGeometry());
 
 	transforms.push_back(&starsMatrix);
-	for(int i = 0; i < bodies.size(); i++)
+	for(unsigned int i = 0; i < bodies.size(); i++)
 		transforms.push_back(bodies.at(i)->getTransformation());
 }
 

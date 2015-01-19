@@ -42,7 +42,7 @@
  *                                                                             *
  ******************************************************************************/
 /* Speed of the simulation. */
-GLfloat speed = + 2.000e2f;
+GLfloat speed = + 8.000e2f;
 
 /* Unit vectors for the 3-D space. */
 glm::vec3  bases[] =
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 	/* Begin the milliseconds counter. */
 	GLuint startMillis = 0, tempMillis = 0, currentMillis = 0, millisPerFrame = 0;
 	startMillis = tempMillis = currentMillis = SDL_GetTicks();	
-	millisPerFrame = (1.0 / FRAMES_PER_SECOND) * MILLIS_PER_SECOND;
+	millisPerFrame = (GLuint) ((1.0 / FRAMES_PER_SECOND) * MILLIS_PER_SECOND);
 	PRINT(millisPerFrame)
 
 	/* Main loop. */
