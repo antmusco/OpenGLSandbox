@@ -47,7 +47,7 @@
 			<tilt>6.687</tilt>
 			<rotationalSpeed>1.5251e-4</rotationalSpeed>
 		</body>
-		<body>
+    <body>
 			<name>Mars</name>
 			<mass>6.4185e23</mass>
 			<radius>3.376e6</radius>

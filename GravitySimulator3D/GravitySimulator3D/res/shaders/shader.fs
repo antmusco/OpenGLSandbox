@@ -2,13 +2,19 @@
 
 precision highp float;
 
+uniform sampler2D texture;
+uniform vec3 lightSource;
+uniform vec4 ambientLight;
+
+varying vec4 outPosition;
 varying vec3 outColor;
 varying vec2 outTexCoord;
-
-uniform sampler2D texture;
+varying vec3 outNormal;
 
 void main()
 {
-	gl_FragColor = texture2D (texture, outTexCoord);
-	//gl_FragColor = vec4(outColor, 1.0);
+	vec3 worldLight = normalize(lightSource - vec3(outPosition));
+	float brightness = clamp(dot(outNormal, worldLight), 0.0, 1.0);
+	vec4 diffuseLight = vec4(brightness, brightness, brightness, 1.0);
+	gl_FragColor = texture2D (texture, outTexCoord) * (ambientLight + diffuseLight);
 }

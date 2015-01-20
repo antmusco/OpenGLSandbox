@@ -154,6 +154,9 @@ OrbitalSystem OrbitalSystem::loadFile(const char* xmlFile)
 
 			/* Set the background parameters of the system. */
 			newSystem.stars = Geometry::loadObj(bgMeshFile_str, bgTextFile_str);
+			Vertex* vertices = newSystem.stars->getVertices();
+			for(unsigned int i = 0; i < newSystem.stars->getNumVertices(); i++)
+				vertices[i].normal = glm::vec3(0.0f, -1.0f, 0.0f);//glm::normalize(vertices[i].position);
 			newSystem.meshes.push_back(newSystem.stars);
 			glm::mat4 starsMatrix = glm::scale(glm::mat4(), glm::vec3(bgRadius_float));
 			newSystem.starsMatrix = glm::rotate(starsMatrix, bgTilt_float, DEFAULT_TILT_AXIS);

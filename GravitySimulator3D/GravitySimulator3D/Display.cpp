@@ -222,8 +222,11 @@ void Display::repaint(std::vector<Mesh*> meshes,
 		glUniform1i(textureUniformLocation, 0);
 
 		/* Send the transformation data down to the buffer. */
+		glUniformMatrix4fv(modelToWorldUniformLocation, 1, GL_FALSE, 
+			 &(*(modelToWorldMatrices.at(i)))[0][0]);
 		glUniformMatrix4fv(modelToProjectionUniformLocation, 1, GL_FALSE,
 			&modelToProjectionMatrix[0][0]);
+
 
 		/* Draw the elements to the window. */
 		glDrawElements(meshes.at(i)->getDrawMode(),      // Draw mode.
@@ -264,9 +267,27 @@ void Display::setShader(Shader shader)
 	modelToProjectionUniformLocation = glGetUniformLocation(
 		shader.getProgram(), "modelToProjectionMatrix");
 
+	modelToWorldUniformLocation = glGetUniformLocation(
+		shader.getProgram(), "modelToWorldMatrix");
+
 	/* Get the location of the texture sampler uniform variable. */
 	textureUniformLocation = glGetUniformLocation(
 		shader.getProgram(), "texture");
+
+	lightSourceUniformLocation = glGetUniformLocation(
+		shader.getProgram(), "lightSource");
+
+	/* Get the location of the light source uniform variable. */
+	ambientLightUniformLocation = glGetUniformLocation(
+		shader.getProgram(), "ambientLight");
+
+	float brightness = 0.5f;
+	glm::vec4 ambientLight(brightness, brightness, brightness, 1.0f);
+	glUniform4fv(ambientLightUniformLocation, 1, &ambientLight[0]);
+
+	glm::vec3 lightSource(0.0f, 2500.0f, 100000.0f);
+	glUniform3fv(lightSourceUniformLocation, 1, &lightSource[0]);
+
 }
 
 /******************************************************************************

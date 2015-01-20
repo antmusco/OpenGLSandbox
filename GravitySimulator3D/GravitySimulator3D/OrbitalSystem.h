@@ -52,6 +52,21 @@ public:
 	{
 		/* Initialize the stars. */
 		stars = Geometry::loadObj(objFile, textureFile);
+		Vertex* vertices = stars->getVertices();
+		for(unsigned int i = 0; i < stars->getNumVertices(); i++)
+		{
+			std::cout << "Old normal: {" 
+					  << vertices[i].normal.x << ", "
+					  << vertices[i].normal.y << ", "
+					  << vertices[i].normal.z << "} ";
+			vertices[i].normal = -glm::normalize(vertices[i].position);
+			std::cout << "New normal: {" 
+					  << vertices[i].normal.x << ", "
+					  << vertices[i].normal.y << ", "
+					  << vertices[i].normal.z << "} "
+					  << std::endl;
+		}
+
 		meshes.push_back(stars);
 		starsMatrix = glm::scale(glm::mat4(), glm::vec3(starsScale));
 		transforms.push_back(&starsMatrix);

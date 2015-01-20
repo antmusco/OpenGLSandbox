@@ -139,5 +139,11 @@ private:
 	GLuint         modelToProjectionUniformLocation;
 	/* Uniform location for the texture. */
 	GLuint         textureUniformLocation;
+	/* Uniform location for the light source. */
+	GLuint         lightSourceUniformLocation;
+	/* Uniform location for the ambient light. */
+	GLuint         ambientLightUniformLocation;
+	/* Uniform location for the model to world transformation.*/
+	GLuint         modelToWorldUniformLocation;
 
 };
